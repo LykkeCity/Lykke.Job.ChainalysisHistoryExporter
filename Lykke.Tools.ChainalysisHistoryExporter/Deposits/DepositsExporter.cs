@@ -14,19 +14,19 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
         private readonly ILogger<DepositsExporter> _logger;
         private readonly Report _report;
         private readonly IEnumerable<IDepositWalletsProvider> _depositWalletsProviders;
-        private readonly IDepositsHistoryProvider _depositsHistoryProvider;
+        private readonly IEnumerable<IDepositsHistoryProvider> _depositsHistoryProviders;
         private readonly SemaphoreSlim _concurrencySemaphore;
 
         public DepositsExporter(
             ILogger<DepositsExporter> logger,
             Report report,
             IEnumerable<IDepositWalletsProvider> depositWalletsProviders,
-            IDepositsHistoryProvider depositsHistoryProvider)
+            IEnumerable<IDepositsHistoryProvider> depositsHistoryProviders)
         {
             _logger = logger;
             _report = report;
             _depositWalletsProviders = depositWalletsProviders;
-            _depositsHistoryProvider = depositsHistoryProvider;
+            _depositsHistoryProviders = depositsHistoryProviders;
 
             _concurrencySemaphore = new SemaphoreSlim(8);
         }
@@ -101,33 +101,41 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
         {
             try
             {
-                PaginatedList<Transaction> transactions = null;
-                var batchNumber = 1;
-
-                do
+                foreach (var historyProvider in _depositsHistoryProviders)
                 {
-                    if (batchNumber % 5 == 0)
+                    if (!historyProvider.CanProvideHistoryFor(wallet))
                     {
-                        _logger.LogInformation($"Exporting deposit wallet {wallet.CryptoCurrency}:{wallet.Address} batch {batchNumber}");
+                        continue;
                     }
 
-                    transactions = await Policy
-                        .Handle<Exception>(ex =>
+                    PaginatedList<Transaction> transactions = null;
+                    var batchNumber = 1;
+
+                    do
+                    {
+                        if (batchNumber % 5 == 0)
                         {
-                            _logger.LogWarning(ex, $"Failed to get deposits history of {wallet.CryptoCurrency}:{wallet.Address}. Operation will be retried.");
-                            return true;
-                        })
-                        .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
-                        .ExecuteAsync(async () => await _depositsHistoryProvider.GetHistoryAsync(wallet, transactions?.Continuation));
+                            _logger.LogInformation($"Exporting deposit wallet  {wallet.CryptoCurrency}:{wallet.Address} batch {batchNumber} using {historyProvider.GetType().Name}");
+                        }
 
-                    foreach (var tx in transactions.Items)
-                    {
-                        await _report.AddTransactionAsync(tx);
-                    }
+                        transactions = await Policy
+                            .Handle<Exception>(ex =>
+                            {
+                                _logger.LogWarning(ex, $"Failed to get deposits history of {wallet.CryptoCurrency}:{wallet.Address}  using {historyProvider.GetType().Name}. Operation will be retried.");
+                                return true;
+                            })
+                            .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
+                            .ExecuteAsync(async () => await historyProvider.GetHistoryAsync(wallet, transactions?.Continuation));
 
-                    batchNumber++;
+                        foreach (var tx in transactions.Items)
+                        {
+                            await _report.AddTransactionAsync(tx);
+                        }
 
-                } while (transactions.Continuation != null);
+                        batchNumber++;
+
+                    } while (transactions.Continuation != null);
+                }
             }
             catch (Exception ex)
             {

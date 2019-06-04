@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using QBitNinja.Client;
 using QBitNinja.Client.Models;
 
-namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders
+namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin
 {
     public class KeySetClient
     {

@@ -10,55 +10,61 @@ using NBitcoin;
 using QBitNinja.Client.Models;
 using Transaction = Lykke.Tools.ChainalysisHistoryExporter.Reporting.Transaction;
 
-namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders
+namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin
 {
     internal class BtcDepositsHistoryProvider : IDepositsHistoryProvider
     {
         private readonly CustomQBitNinjaClient _client;
-        
-        public BtcDepositsHistoryProvider(IOptions<BtcSettings> settings)
+        private readonly Blockchain _bitcoin;
+
+        public BtcDepositsHistoryProvider(
+            BlockchainsProvider blockchainsProvider,
+            IOptions<BtcSettings> settings)
         {
+            _bitcoin = blockchainsProvider.GetBitcoin();
             _client = new CustomQBitNinjaClient(new Uri(settings.Value.NinjaUrl), Network.GetNetwork(settings.Value.Network));
+        }
+
+        public bool CanProvideHistoryFor(DepositWallet depositWallet)
+        {
+            return depositWallet.CryptoCurrency == _bitcoin.CryptoCurrency;
         }
 
         public async Task<PaginatedList<Transaction>> GetHistoryAsync(DepositWallet depositWallet, string continuation)
         {
-            if (depositWallet.CryptoCurrency != "BTC")
+            if (!CanProvideHistoryFor(depositWallet))
             {
                 return PaginatedList.From(Array.Empty<Transaction>());
             }
 
-            var btcAddr = GetAddressOrDefault(depositWallet.Address);
-            if (btcAddr == null)
+            var btcAddress = GetAddressOrDefault(depositWallet.Address);
+            if (btcAddress == null)
             {
                 return PaginatedList.From(Array.Empty<Transaction>());
             }
 
-            var resp = await _client.GetBalance(btcAddr, false, continuation);
+            var response = await _client.GetBalance(btcAddress, false, continuation);
+            var depositOperations = response.Operations.Where(IsDeposit);
+            var depositTransactions = Map(depositOperations, depositWallet.Address, depositWallet.UserId);
 
-            var mapped = Map(resp.Operations.Where(IsCashin).ToList(), depositWallet.Address, depositWallet.UserId);
-
-            return PaginatedList.From(resp.Continuation, mapped.ToArray());
+            return PaginatedList.From(response.Continuation, depositTransactions.ToArray());
         }
 
-        private static IEnumerable<Transaction> Map(IEnumerable<BalanceOperation> source, 
+        private IEnumerable<Transaction> Map(IEnumerable<BalanceOperation> source, 
             string outputAddress,
-            Guid depositWalletUserId)
+            Guid userId)
         {
-            foreach (var balanceOperation in source)
+            return source.Select(balanceOperation => new Transaction
             {
-                yield return new Transaction
-                {
-                    CryptoCurrency = "BTC",
-                    Hash = balanceOperation.TransactionId.ToString(),
-                    OutputAddress = outputAddress,
-                    Type = TransactionType.Deposit,
-                    UserId = depositWalletUserId
-                };
-            }
+                CryptoCurrency = _bitcoin.CryptoCurrency,
+                Hash = balanceOperation.TransactionId.ToString(),
+                OutputAddress = outputAddress,
+                Type = TransactionType.Deposit,
+                UserId = userId
+            });
         }
 
-        private static bool IsCashin(BalanceOperation source)
+        private static bool IsDeposit(BalanceOperation source)
         {
             return !source.SpentCoins.Any();
         }
@@ -83,8 +89,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
         {
             try
             {
-                BitcoinAddress.Create(address,
-                    _client.Network);
+                BitcoinAddress.Create(address, _client.Network);
 
                 return true;
             }

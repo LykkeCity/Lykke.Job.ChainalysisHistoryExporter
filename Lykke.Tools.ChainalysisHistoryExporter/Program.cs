@@ -4,7 +4,7 @@ using Lykke.Tools.ChainalysisHistoryExporter.Assets;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits;
-using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders;
+using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Lykke.Tools.ChainalysisHistoryExporter.Withdrawals;
