@@ -42,7 +42,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.AddSingleton<IDepositWalletsProvider, BcnCredentialsDepositWalletsProvider>();
             services.AddSingleton<IDepositWalletsProvider, WalletCredentialsDepositWalletsProvider>();
 
-            services.AddSingleton<IDepositsHistoryProvider, DepositsHistoryProvider>();
+            services.AddSingleton<IDepositsHistoryProvider, BtcDepositsHistoryProvider>();
             
             services.AddLogging(logging =>
             {
@@ -52,6 +52,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.Configure<AzureStorageSettings>(configuration.GetSection("AzureStorage"));
             services.Configure<ReportSettings>(configuration.GetSection("Report"));
             services.Configure<ServicesSettings>(configuration.GetSection("Services"));
+            services.Configure<BtcSettings>(configuration.GetSection("Btc"));
 
             ServiceProvider = services.BuildServiceProvider();
         }

@@ -13,6 +13,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 
             return new PaginatedList<TItem>(continuation, items);
         }
+
+        public static PaginatedList<TItem> From<TItem>(IReadOnlyCollection<TItem> items)
+        {
+            return new PaginatedList<TItem>(null, items);
+        }
     }
 
     internal class PaginatedList<T>
