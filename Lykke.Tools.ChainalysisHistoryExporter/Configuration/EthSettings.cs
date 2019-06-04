@@ -1,7 +1,7 @@
 ﻿namespace Lykke.Tools.ChainalysisHistoryExporter.Configuration
 {
-    internal class ServicesSettings
+    internal class EthSettings
     {
-        public string Assets { get; set; }
+        public string SamuraiUrl { get; set; }
     }
 }

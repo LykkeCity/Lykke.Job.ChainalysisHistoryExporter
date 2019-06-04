@@ -38,6 +38,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
             return GetByBilIdOrDefault("Bitcoin");
         }
 
+        public Blockchain GetEthereum()
+        {
+            return GetByBilIdOrDefault("Ethereum");
+        }
+
         public Blockchain GetByAssetIdOrDefault(string assetId)
         {
             var asset = _assetsProvider.GetByIdOrDefault(assetId);
@@ -56,6 +61,8 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
                     return result;
                 }
             }
+
+            // TODO: Look at Service.Operations how full list of ERC20 tokens is obtained.
 
             if (asset.Blockchain != null)
             {

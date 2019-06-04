@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
 {
-    internal class BilDepositWalletsProvider : IDepositWalletsProvider
+    internal class BilAzureDepositWalletsProvider : IDepositWalletsProvider
     {
         #region Entities
 
@@ -31,10 +31,16 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProvider
         private readonly BlockchainsProvider _blockchainsProvider;
         private readonly CloudTable _table;
 
-        public BilDepositWalletsProvider(
+        public BilAzureDepositWalletsProvider(
             IOptions<AzureStorageSettings> azureStorageSettings,
+            IOptions<DepositWalletProvidersSettings> depositWalletProvidersSettings,
             BlockchainsProvider blockchainsProvider)
         {
+            if (!depositWalletProvidersSettings.Value.UseBlockchainWalletsAzureStorage)
+            {
+                return;
+            }
+
             _blockchainsProvider = blockchainsProvider;
 
             var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.BlockchainWalletsConnString);
@@ -45,6 +51,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProvider
 
         public async Task<PaginatedList<DepositWallet>> GetWalletsAsync(string continuation)
         {
+            if (_table == null)
+            {
+                return PaginatedList.From(Array.Empty<DepositWallet>());
+            }
+
             var continuationToken = continuation != null
                 ? JsonConvert.DeserializeObject<TableContinuationToken>(continuation)
                 : null;

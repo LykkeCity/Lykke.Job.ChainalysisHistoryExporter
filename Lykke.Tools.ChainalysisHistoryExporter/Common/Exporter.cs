@@ -1,34 +1,51 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits;
+using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Lykke.Tools.ChainalysisHistoryExporter.Withdrawals;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 {
     internal class Exporter
     {
+        private readonly Report _report;
         private readonly ILogger<Exporter> _logger;
-        private readonly WithdrawalsExporter _withdrawalsExporter;
+        private readonly IServiceProvider _serviceProvider;
         private readonly DepositsExporter _depositsExporter;
 
         public Exporter(
+            Report report,
             ILogger<Exporter> logger,
-            WithdrawalsExporter withdrawalsExporter, 
+            IServiceProvider serviceProvider, 
             DepositsExporter depositsExporter)
         {
+            _report = report;
             _logger = logger;
-            _withdrawalsExporter = withdrawalsExporter;
+            _serviceProvider = serviceProvider;
             _depositsExporter = depositsExporter;
         }
 
         public async Task ExportAsync()
         {
             _logger.LogInformation("Exporting...");
+            
+            {
+                // Localizes lifetime of the withdrawals exported to free up consumed memory when it finished.
+                var withdrawalsExporter = _serviceProvider.GetRequiredService<WithdrawalsExporter>();
 
-            await _withdrawalsExporter.ExportAsync();
+                await withdrawalsExporter.ExportAsync();
+
+                // ReSharper disable once RedundantAssignment
+                withdrawalsExporter = null;
+            }
+
             await _depositsExporter.ExportAsync();
 
-            _logger.LogInformation("Exporting done");
+            await _report.SaveAsync();
+
+            _logger.LogInformation($"Exporting done.");
         }
     }
 }

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
@@ -16,6 +19,9 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
         private readonly IEnumerable<IDepositWalletsProvider> _depositWalletsProviders;
         private readonly IEnumerable<IDepositsHistoryProvider> _depositsHistoryProviders;
         private readonly SemaphoreSlim _concurrencySemaphore;
+        private int _processedWalletsCount;
+        private int _exportedDepositsCount;
+        private int _totalDepositWalletsCount;
 
         public DepositsExporter(
             ILogger<DepositsExporter> logger,
@@ -34,6 +40,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
         public async Task ExportAsync()
         {
             var depositWallets = await LoadDepositWalletsAsync();
+
+            _totalDepositWalletsCount = depositWallets.Count;
+
+            await SaveDepositWalletsAsync(depositWallets);
+
             var tasks = new List<Task>(512);
 
             _logger.LogInformation("Exporting deposits...");
@@ -51,7 +62,20 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                 }
             }
 
-            _logger.LogInformation("Deposits exporting done");
+            _logger.LogInformation($"Deposits exporting done. {_processedWalletsCount} deposit wallets processed. {_exportedDepositsCount} deposits exported");
+        }
+
+        private static async Task SaveDepositWalletsAsync(IReadOnlyCollection<DepositWallet> depositWallets)
+        {
+            var stream = File.Open("deposit-wallets.csv", FileMode.Create, FileAccess.Write, FileShare.Read);
+            
+            using(var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                foreach (var wallet in depositWallets)
+                {
+                    await writer.WriteLineAsync($"{wallet.UserId},{wallet.CryptoCurrency},{wallet.Address}");
+                }
+            }
         }
 
         public void Dispose()
@@ -65,15 +89,15 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
             var allWallets = new HashSet<DepositWallet>(131072); // 2 ^ 17
 
-            foreach (var provider in _depositWalletsProviders)
+            int loadedDepositWalletsCount = 0;
+
+            async Task<IReadOnlyCollection<DepositWallet>> LoadProviderWalletsAsync(IDepositWalletsProvider provider)
             {
                 PaginatedList<DepositWallet> wallets = null;
-                var batchNumber = 1;
+                var allWalletsOfProvider = new List<DepositWallet>(65536);
 
                 do
                 {
-                    _logger.LogInformation($"Loading deposit wallets batch {batchNumber} using {provider.GetType().Name}");
-
                     wallets = await Policy
                         .Handle<Exception>(ex =>
                         {
@@ -81,18 +105,44 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                             return true;
                         })
                         .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
+                        // ReSharper disable once AccessToModifiedClosure
                         .ExecuteAsync(async () => await provider.GetWalletsAsync(wallets?.Continuation));
 
-                    foreach (var wallet in wallets.Items)
+                    foreach (var wallet in wallets.Items.Where(x => x.Address != null))
                     {
-                        allWallets.Add(wallet);
+                        allWalletsOfProvider.Add(wallet);
+
+                        var currentLoadedDepositWalletsCount = Interlocked.Increment(ref loadedDepositWalletsCount);
+
+                        if (currentLoadedDepositWalletsCount % 1000 == 0)
+                        {
+                            _logger.LogInformation($"{currentLoadedDepositWalletsCount} deposit wallets loaded so far");
+                        }
                     }
 
-                    batchNumber++;
                 } while (wallets.Continuation != null);
+
+                return allWalletsOfProvider;
             }
 
-            _logger.LogInformation($"Deposit wallets loading done. {allWallets.Count} loaded");
+            var tasks = new List<Task<IReadOnlyCollection<DepositWallet>>>();
+
+            foreach (var provider in _depositWalletsProviders)
+            {
+                tasks.Add(LoadProviderWalletsAsync(provider));
+            }
+
+            await Task.WhenAll(tasks);
+
+            foreach (var task in tasks)
+            {
+                foreach (var wallet in task.Result)
+                {
+                    allWallets.Add(wallet);
+                }
+            }
+
+            _logger.LogInformation($"Deposit wallets loading done. {allWallets.Count} unique deposit wallets loaded");
 
             return allWallets;
         }
@@ -109,15 +159,10 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                     }
 
                     PaginatedList<Transaction> transactions = null;
-                    var batchNumber = 1;
+                    var processedWalletTransactionsCount = 0;
 
                     do
                     {
-                        if (batchNumber % 5 == 0)
-                        {
-                            _logger.LogInformation($"Exporting deposit wallet  {wallet.CryptoCurrency}:{wallet.Address} batch {batchNumber} using {historyProvider.GetType().Name}");
-                        }
-
                         transactions = await Policy
                             .Handle<Exception>(ex =>
                             {
@@ -129,11 +174,17 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
                         foreach (var tx in transactions.Items)
                         {
-                            await _report.AddTransactionAsync(tx);
+                            _report.AddTransaction(tx);
+
+                            Interlocked.Increment(ref _exportedDepositsCount);
+                            ++processedWalletTransactionsCount;
+
+                            if (processedWalletTransactionsCount % 100 == 0)
+                            {
+                                _logger.LogInformation($"{processedWalletTransactionsCount} deposits processed so far of {wallet.CryptoCurrency}:{wallet.Address} wallet using {historyProvider.GetType().Name}");
+                            }
                         }
-
-                        batchNumber++;
-
+                        
                     } while (transactions.Continuation != null);
                 }
             }
@@ -143,6 +194,14 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             }
             finally
             {
+                var processedWalletsCount = Interlocked.Increment(ref _processedWalletsCount);
+
+                if (processedWalletsCount % 100 == 0)
+                {
+                    var completedPercent = processedWalletsCount * 100 / _totalDepositWalletsCount;
+                    _logger.LogInformation($"{processedWalletsCount} wallets processed so far ({completedPercent}%). {_exportedDepositsCount} deposits exported so far.");
+                }
+
                 _concurrencySemaphore.Release();
             }
         }

@@ -1,46 +1,51 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
 {
-    internal class Report : IDisposable
+    internal class Report
     {
-        private readonly StreamWriter _writer;
-        private readonly SemaphoreSlim _lock;
+        private readonly ILogger<Report> _logger;
+        private readonly IOptions<ReportSettings> _settings;
+        private readonly HashSet<Transaction> _transactions;
 
-        public Report(IOptions<ReportSettings> settings)
+        public Report(
+            ILogger<Report> logger,
+            IOptions<ReportSettings> settings)
         {
-            var stream = File.Open(settings.Value.FilePath, FileMode.Create, FileAccess.Write, FileShare.Read);
-            _writer = new StreamWriter(stream, Encoding.UTF8);
-
-            _writer.WriteLineAsync("user-id,cryptocurrency,tx-type,tx-hash,output-address");
-
-            _lock = new SemaphoreSlim(1);
+            _logger = logger;
+            _settings = settings;
+            _transactions = new HashSet<Transaction>(1048576);
         }
 
-        public async Task AddTransactionAsync(Transaction tx)
+        public void AddTransaction(Transaction tx)
         {
-            await _lock.WaitAsync();
-
-            try
-            {
-                await _writer.WriteLineAsync($"{tx.UserId},{tx.CryptoCurrency},{GetTransactionType(tx)},{tx.Hash},{tx.OutputAddress}");
-            }
-            finally
-            {
-                _lock.Release();
-            }
+            _transactions.Add(tx);
         }
 
-        public void Dispose()
+        public async Task SaveAsync()
         {
-            _writer.Dispose();
+            var filePath = _settings.Value.FilePath;
+
+            _logger.LogInformation($"Saving report to {filePath}...");
+
+            var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            using (var writer = new StreamWriter(stream, Encoding.UTF8))
+            {
+                await writer.WriteLineAsync("user-id,cryptocurrency,tx-type,tx-hash,output-address");
+
+                foreach (var tx in _transactions)
+                {
+                    await writer.WriteLineAsync($"{tx.UserId},{tx.CryptoCurrency},{GetTransactionType(tx)},{tx.Hash},{tx.OutputAddress}");    
+                }
+            }
+
+            _logger.LogInformation($"Report saving done. {_transactions.Count} unique transactions saved");
         }
 
         private static string GetTransactionType(Transaction tx)

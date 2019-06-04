@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -49,6 +51,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
 
         private class OperationExecutionEntity : TableEntity
         {
+            public Guid OperationId { get; set; }
             public string State { get; set; }
             public string Result { get; set; }
             public string TransactionHash { get; set; }
@@ -61,14 +64,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
 
         #endregion
 
+        private readonly ILogger<BilCashoutsBatchWithdrawalsHistoryProvider> _logger;
         private readonly BlockchainsProvider _blockchainsProvider;
         private readonly CloudTable _cashoutBatchesTable;
         private readonly CloudTable _operationExecutionsTable;
+        private IReadOnlyDictionary<Guid, OperationExecutionEntity> _operationExecutions;
 
         public BilCashoutsBatchWithdrawalsHistoryProvider(
+            ILogger<BilCashoutsBatchWithdrawalsHistoryProvider> logger,
             BlockchainsProvider blockchainsProvider,
             IOptions<AzureStorageSettings> azureStorageSettings)
         {
+            _logger = logger;
             _blockchainsProvider = blockchainsProvider;
 
             var cashoutProcessorAzureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.CashoutProcessorConnString);
@@ -84,6 +91,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
 
         public async Task<PaginatedList<Transaction>> GetHistoryAsync(string continuation)
         {
+            var operationExecutions = await GetOperationExecutionsAsync();
             var continuationToken = continuation != null
                 ? JsonConvert.DeserializeObject<TableContinuationToken>(continuation)
                 : null;
@@ -104,86 +112,75 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
                         return Enumerable.Empty<Transaction>();
                     }
 
-                    var operationExecution = GetOperationExecution(cashoutsBatch.BatchId).Result;
+                    if (!operationExecutions.TryGetValue(cashoutsBatch.BatchId, out var operationExecution))
+                    {
+                        _logger.LogWarning($"Operation execution for cashouts batch {cashoutsBatch.BatchId} not found, skipping");
+
+                        return Enumerable.Empty<Transaction>();
+                    }
 
                     if (operationExecution.Result != OperationExecutionResult.Completed &&
-                        operationExecution.Result != OperationExecutionResult.Success ||
-                        operationExecution.TransactionHash == null)
+                        operationExecution.Result != OperationExecutionResult.Success)
                     {
+                        return Enumerable.Empty<Transaction>();
+                    }
+
+                    if (operationExecution.TransactionHash == null)
+                    {
+                        _logger.LogWarning($"Transaction hash for cashouts batch {cashoutsBatch.BatchId} is empty, skipping");
+
                         return Enumerable.Empty<Transaction>();
                     }
 
                     var cashouts = JsonConvert.DeserializeObject<BatchedCashout[]>(cashoutsBatch.Cashouts);
 
                     return cashouts.Select(cashout => new Transaction
-                    {
-                        CryptoCurrency = blockchain.CryptoCurrency,
-                        Hash = operationExecution.TransactionHash,
-                        UserId = cashout.ClientId,
-                        OutputAddress = cashout.DestinationAddress,
-                        Type = TransactionType.Withdrawal
-                    });
+                    (
+                        blockchain.CryptoCurrency,
+                        operationExecution.TransactionHash,
+                        cashout.ClientId,
+                        cashout.DestinationAddress,
+                        TransactionType.Withdrawal
+                    ));
                 })
                 .ToArray();
 
             return PaginatedList.From(response.ContinuationToken, transactions);
         }
 
-        // TODO: This produces a lot of round trips. Need to read all operations at once and cache them
-        private async Task<OperationExecutionEntity> GetOperationExecution(Guid batchId)
+        private async Task<IReadOnlyDictionary<Guid, OperationExecutionEntity>> GetOperationExecutionsAsync()
         {
-            var partitionKey = CalculateHexHash32(batchId.ToString());
-            var rowKey = $"{batchId:D}";
-            var tableOperation = TableOperation.Retrieve<OperationExecutionEntity>(partitionKey, rowKey);
-
-            var response = await _operationExecutionsTable.ExecuteAsync(tableOperation);
-
-            return (OperationExecutionEntity) response.Result;
-        }
-
-        private static string CalculateHexHash32(string value, int length = 3)
-        {
-            if (length < 1 || length > 8)
+            if (_operationExecutions != null)
             {
-                throw new ArgumentOutOfRangeException(nameof(length), length, "Length should be in the range [1..8]");
+                return _operationExecutions;
             }
 
-            uint mask = 0xF;
+            _logger.LogInformation("Loading operation executions...");
 
-            for (var i = 1; i < length; ++i)
+            var query = new TableQuery<OperationExecutionEntity>
             {
-                // One hex digit - 4 bits, so multiplies i by 4
-                mask |= 0xFu << (i * 4);
-            }
+                TakeCount = 1000
+            };
+            TableContinuationToken continuationToken = null;
+            var result = new List<OperationExecutionEntity>(131072);
 
-            unchecked
+            do
             {
-                return ((uint)CalculateHash32(value) & mask).ToString($"X{length}");
-            }
-        }
+                var response = await _operationExecutionsTable.ExecuteQuerySegmentedAsync(query, continuationToken);
 
-        private static int CalculateHash32(string value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
+                continuationToken = response.ContinuationToken;
 
-            var hashedValue = 618258791u;
+                result.AddRange(response.Results);
 
-            foreach (var c in value)
-            {
-                unchecked
-                {
-                    hashedValue += c;
-                    hashedValue *= 618258799u;
-                }
-            }
+                _logger.LogInformation($"{result.Count / 1000 * 1000} operation executions loaded so far");
 
-            unchecked
-            {
-                return (int)hashedValue;
-            }
+            } while (continuationToken != null);
+
+            _operationExecutions = result.ToDictionary(x => x.OperationId);
+
+            _logger.LogInformation($"Operation executions loading done. {_operationExecutions.Count} operation executions loaded");
+
+            return _operationExecutions;
         }
     }
 }

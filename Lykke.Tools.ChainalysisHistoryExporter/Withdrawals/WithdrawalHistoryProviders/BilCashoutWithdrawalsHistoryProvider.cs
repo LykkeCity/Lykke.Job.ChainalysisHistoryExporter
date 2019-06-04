@@ -80,13 +80,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
                     }
 
                     return new Transaction
-                    {
-                        CryptoCurrency = blockchain.CryptoCurrency,
-                        Hash = cashout.TransactionHash,
-                        UserId = cashout.ClientId,
-                        OutputAddress = cashout.ToAddress,
-                        Type = TransactionType.Withdrawal
-                    };
+                    (
+                        blockchain.CryptoCurrency,
+                        cashout.TransactionHash,
+                        cashout.ClientId,
+                        cashout.ToAddress,
+                        TransactionType.Withdrawal
+                    );
                 })
                 .Where(x => x != null)
                 .ToArray();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
@@ -13,6 +14,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
         private readonly ILogger<WithdrawalsExporter> _logger;
         private readonly Report _report;
         private readonly IEnumerable<IWithdrawalsHistoryProvider> _withdrawalsHistoryProviders;
+        private int _exportedWithdrawalsCount;
 
         public WithdrawalsExporter(
             ILogger<WithdrawalsExporter> logger,
@@ -28,35 +30,46 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
         {
             _logger.LogInformation("Exporting withdrawals...");
 
+            var tasks = new List<Task>();
+
             foreach (var historyProvider in _withdrawalsHistoryProviders)
             {
-                PaginatedList<Transaction> transactions = null;
-                var batchNumber = 1;
-
-                do
-                {
-                    _logger.LogInformation($"Exporting withdrawals batch {batchNumber} using {historyProvider.GetType().Name}");
-
-                    transactions = await Policy
-                        .Handle<Exception>(ex =>
-                        {
-                            _logger.LogWarning(ex, $"Failed to get withdrawals history using {historyProvider.GetType().Name}. Operation will be retried.");
-                            return true;
-                        })
-                        .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
-                        .ExecuteAsync(async () => await historyProvider.GetHistoryAsync(transactions?.Continuation));
-
-                    foreach (var tx in transactions.Items)
-                    {
-                        await _report.AddTransactionAsync(tx);
-                    }
-
-                    batchNumber++;
-
-                } while (transactions.Continuation != null);
+                tasks.Add(ExportProviderWithdrawals(historyProvider));
             }
 
-            _logger.LogInformation("Withdrawals exporting done");
+            await Task.WhenAll(tasks);
+
+            _logger.LogInformation($"Withdrawals exporting done. {_exportedWithdrawalsCount} withdrawals exported");
+        }
+
+        private async Task ExportProviderWithdrawals(IWithdrawalsHistoryProvider historyProvider)
+        {
+            PaginatedList<Transaction> transactions = null;
+
+            do
+            {
+                transactions = await Policy
+                    .Handle<Exception>(ex =>
+                    {
+                        _logger.LogWarning(ex,
+                            $"Failed to get withdrawals history using {historyProvider.GetType().Name}. Operation will be retried.");
+                        return true;
+                    })
+                    .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
+                    .ExecuteAsync(async () => await historyProvider.GetHistoryAsync(transactions?.Continuation));
+
+                foreach (var tx in transactions.Items)
+                {
+                    _report.AddTransaction(tx);
+
+                    var exportedWithdrawalsCount = Interlocked.Increment(ref _exportedWithdrawalsCount);
+
+                    if (exportedWithdrawalsCount % 1000 == 0)
+                    {
+                        _logger.LogInformation($"{exportedWithdrawalsCount} withdrawals exported so far");
+                    }
+                }
+            } while (transactions.Continuation != null);
         }
     }
 }

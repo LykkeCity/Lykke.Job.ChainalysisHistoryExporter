@@ -5,6 +5,7 @@ using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin;
+using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Lykke.Tools.ChainalysisHistoryExporter.Withdrawals;
@@ -15,7 +16,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter
 {
-    internal class Program
+    internal class Program : IDisposable
     {
         private IServiceProvider ServiceProvider { get; }
 
@@ -30,19 +31,21 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
 
             services.AddSingleton<Report>();
             services.AddSingleton<Exporter>();
-            services.AddSingleton<WithdrawalsExporter>();
-            services.AddSingleton<DepositsExporter>();
             services.AddSingleton<BlockchainsProvider>();
             services.AddSingleton<AssetsProvider>();
-
-            services.AddSingleton<IWithdrawalsHistoryProvider, BilCashoutWithdrawalsHistoryProvider>();
-            services.AddSingleton<IWithdrawalsHistoryProvider, BilCashoutsBatchWithdrawalsHistoryProvider>();
+            services.AddTransient<WithdrawalsExporter>();
+            services.AddTransient<DepositsExporter>();
             
-            services.AddSingleton<IDepositWalletsProvider, BilDepositWalletsProvider>();
-            services.AddSingleton<IDepositWalletsProvider, BcnCredentialsDepositWalletsProvider>();
-            services.AddSingleton<IDepositWalletsProvider, WalletCredentialsDepositWalletsProvider>();
+            services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutWithdrawalsHistoryProvider>();
+            services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutsBatchWithdrawalsHistoryProvider>();
+            
+            services.AddTransient<IDepositWalletsProvider, BilAzureDepositWalletsProvider>();
+            services.AddTransient<IDepositWalletsProvider, BilMongoDepositWalletsProvider>();
+            services.AddTransient<IDepositWalletsProvider, BcnCredentialsDepositWalletsProvider>();
+            services.AddTransient<IDepositWalletsProvider, WalletCredentialsDepositWalletsProvider>();
 
-            services.AddSingleton<IDepositsHistoryProvider, BtcDepositsHistoryProvider>();
+            services.AddTransient<IDepositsHistoryProvider, BtcDepositsHistoryProvider>();
+            services.AddTransient<IDepositsHistoryProvider, EthDepositsHistoryProvider>();
             
             services.AddLogging(logging =>
             {
@@ -50,18 +53,22 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             });
 
             services.Configure<AzureStorageSettings>(configuration.GetSection("AzureStorage"));
+            services.Configure<MongoStorageSettings>(configuration.GetSection("MongoStorage"));
             services.Configure<ReportSettings>(configuration.GetSection("Report"));
             services.Configure<ServicesSettings>(configuration.GetSection("Services"));
+            services.Configure<DepositWalletProvidersSettings>(configuration.GetSection("DepositWalletProviders"));
             services.Configure<BtcSettings>(configuration.GetSection("Btc"));
+            services.Configure<EthSettings>(configuration.GetSection("Eth"));
 
             ServiceProvider = services.BuildServiceProvider();
         }
 
         private static async Task Main(string[] args)
         {
-            var program = new Program();
-
-            await program.RunAsync();
+            using (var program = new Program())
+            {
+                await program.RunAsync();
+            }
         }
 
         private async Task RunAsync()
@@ -72,6 +79,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             await assetsProvider.InitializeAsync();
 
             await exporter.ExportAsync();
+        }
+
+        public void Dispose()
+        {
+            (ServiceProvider as IDisposable)?.Dispose();
         }
     }
 }

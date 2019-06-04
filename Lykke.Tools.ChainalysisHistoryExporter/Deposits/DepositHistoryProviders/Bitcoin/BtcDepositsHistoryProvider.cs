@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NBitcoin;
 using QBitNinja.Client.Models;
@@ -14,13 +15,16 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
 {
     internal class BtcDepositsHistoryProvider : IDepositsHistoryProvider
     {
+        private readonly ILogger<BtcDepositsHistoryProvider> _logger;
         private readonly CustomQBitNinjaClient _client;
         private readonly Blockchain _bitcoin;
 
         public BtcDepositsHistoryProvider(
+            ILogger<BtcDepositsHistoryProvider> logger,
             BlockchainsProvider blockchainsProvider,
             IOptions<BtcSettings> settings)
         {
+            _logger = logger;
             _bitcoin = blockchainsProvider.GetBitcoin();
             _client = new CustomQBitNinjaClient(new Uri(settings.Value.NinjaUrl), Network.GetNetwork(settings.Value.Network));
         }
@@ -40,6 +44,8 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
             var btcAddress = GetAddressOrDefault(depositWallet.Address);
             if (btcAddress == null)
             {
+                _logger.LogWarning($"Address {depositWallet.Address} is not valid Bitcoin address, skipping");
+
                 return PaginatedList.From(Array.Empty<Transaction>());
             }
 
@@ -55,13 +61,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
             Guid userId)
         {
             return source.Select(balanceOperation => new Transaction
-            {
-                CryptoCurrency = _bitcoin.CryptoCurrency,
-                Hash = balanceOperation.TransactionId.ToString(),
-                OutputAddress = outputAddress,
-                Type = TransactionType.Deposit,
-                UserId = userId
-            });
+            (
+                _bitcoin.CryptoCurrency,
+                balanceOperation.TransactionId.ToString(),
+                userId,
+                outputAddress,
+                TransactionType.Deposit
+            ));
         }
 
         private static bool IsDeposit(BalanceOperation source)
