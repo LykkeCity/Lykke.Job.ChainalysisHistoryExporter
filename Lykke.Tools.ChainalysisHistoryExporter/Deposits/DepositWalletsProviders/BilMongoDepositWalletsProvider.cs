@@ -76,11 +76,6 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProvider
             IOptions<MongoStorageSettings> settings,
             IOptions<DepositWalletProvidersSettings> depositWalletProvidersSettings)
         {
-            if (!depositWalletProvidersSettings.Value.UseBlockchainWalletsMongoStorage)
-            {
-                return;
-            }
-
             _blockchainsProvider = blockchainsProvider;
 
             var client = new MongoClient(settings.Value.BlockchainWalletsConnString);
@@ -91,11 +86,6 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProvider
 
         public async Task<PaginatedList<DepositWallet>> GetWalletsAsync(string continuation)
         {
-            if (_collection == null)
-            {
-                return PaginatedList.From(Array.Empty<DepositWallet>());
-            }
-
             var continuationToken = continuation != null
                 ? JsonConvert.DeserializeObject<MongoContinuationToken>(continuation)
                 : new MongoContinuationToken {Skip = 0};

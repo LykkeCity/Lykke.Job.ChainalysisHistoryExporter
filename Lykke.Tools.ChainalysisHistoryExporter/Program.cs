@@ -57,6 +57,8 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.Configure<ReportSettings>(configuration.GetSection("Report"));
             services.Configure<ServicesSettings>(configuration.GetSection("Services"));
             services.Configure<DepositWalletProvidersSettings>(configuration.GetSection("DepositWalletProviders"));
+            services.Configure<DepositHistoryProvidersSettings>(configuration.GetSection("DepositHistoryProviders"));
+            services.Configure<WithdrawalHistoryProvidersSettings>(configuration.GetSection("WithdrawalHistoryProviders"));
             services.Configure<BtcSettings>(configuration.GetSection("Btc"));
             services.Configure<EthSettings>(configuration.GetSection("Eth"));
 

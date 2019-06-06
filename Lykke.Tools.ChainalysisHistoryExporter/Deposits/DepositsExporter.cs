@@ -6,8 +6,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
+using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Polly;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
@@ -16,8 +18,8 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
     {
         private readonly ILogger<DepositsExporter> _logger;
         private readonly Report _report;
-        private readonly IEnumerable<IDepositWalletsProvider> _depositWalletsProviders;
-        private readonly IEnumerable<IDepositsHistoryProvider> _depositsHistoryProviders;
+        private readonly IReadOnlyCollection<IDepositWalletsProvider> _depositWalletsProviders;
+        private readonly IReadOnlyCollection<IDepositsHistoryProvider> _depositsHistoryProviders;
         private readonly SemaphoreSlim _concurrencySemaphore;
         private int _processedWalletsCount;
         private int _exportedDepositsCount;
@@ -27,12 +29,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             ILogger<DepositsExporter> logger,
             Report report,
             IEnumerable<IDepositWalletsProvider> depositWalletsProviders,
-            IEnumerable<IDepositsHistoryProvider> depositsHistoryProviders)
+            IEnumerable<IDepositsHistoryProvider> depositsHistoryProviders,
+            IOptions<DepositWalletProvidersSettings> depositWalletsProvidersSettings,
+            IOptions<DepositHistoryProvidersSettings> depositHistoryProvidersSettings)
         {
             _logger = logger;
             _report = report;
-            _depositWalletsProviders = depositWalletsProviders;
-            _depositsHistoryProviders = depositsHistoryProviders;
+            _depositWalletsProviders = depositWalletsProviders
+                .Where(x => depositWalletsProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
+                .ToArray();
+            _depositsHistoryProviders = depositsHistoryProviders
+                .Where(x => depositHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
+                .ToArray();
 
             _concurrencySemaphore = new SemaphoreSlim(8);
         }

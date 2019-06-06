@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
+using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Polly;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
@@ -13,17 +16,20 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
     {
         private readonly ILogger<WithdrawalsExporter> _logger;
         private readonly Report _report;
-        private readonly IEnumerable<IWithdrawalsHistoryProvider> _withdrawalsHistoryProviders;
+        private readonly IReadOnlyCollection<IWithdrawalsHistoryProvider> _withdrawalsHistoryProviders;
         private int _exportedWithdrawalsCount;
 
         public WithdrawalsExporter(
             ILogger<WithdrawalsExporter> logger,
             Report report,
-            IEnumerable<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders)
+            IEnumerable<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders,
+            IOptions<WithdrawalHistoryProvidersSettings> withdrawalsHistoryProvidersSettings)
         {
             _logger = logger;
             _report = report;
-            _withdrawalsHistoryProviders = withdrawalsHistoryProviders;
+            _withdrawalsHistoryProviders = withdrawalsHistoryProviders
+                .Where(x => withdrawalsHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
+                .ToArray();
         }
 
         public async Task ExportAsync()
