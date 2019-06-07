@@ -4,15 +4,15 @@ using Lykke.Tools.ChainalysisHistoryExporter.Assets;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 {
-    internal class BlockchainsProvider
+    public class BlockchainsProvider
     {
-        private readonly AssetsProvider _assetsProvider;
+        private readonly AssetsClient _assetsClient;
         private readonly Dictionary<string, Blockchain> _byBillId;
         private readonly Dictionary<string, Blockchain> _byAssetBlockchain;
 
-        public BlockchainsProvider(AssetsProvider assetsProvider)
+        public BlockchainsProvider(AssetsClient assetsClient)
         {
-            _assetsProvider = assetsProvider;
+            _assetsClient = assetsClient;
 
             var blockchains = new List<Blockchain>
             {
@@ -43,9 +43,19 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
             return GetByBilIdOrDefault("Ethereum");
         }
 
+        public Blockchain GetLiteCoin()
+        {
+            return GetByBilIdOrDefault("LiteCoin");
+        }
+
+        public Blockchain GetBitcoinCash()
+        {
+            return GetByBilIdOrDefault("BitcoinCash");
+        }
+
         public Blockchain GetByAssetIdOrDefault(string assetId)
         {
-            var asset = _assetsProvider.GetByIdOrDefault(assetId);
+            var asset = _assetsClient.GetByIdOrDefault(assetId);
 
             if (asset == null)
             {

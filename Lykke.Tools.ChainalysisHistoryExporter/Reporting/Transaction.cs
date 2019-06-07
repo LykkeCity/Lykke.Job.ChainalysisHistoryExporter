@@ -2,7 +2,7 @@
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
 {
-    internal class Transaction : IEquatable<Transaction>
+    public class Transaction : IEquatable<Transaction>
     {
         public string CryptoCurrency { get; }
         public string Hash { get; }

@@ -1,7 +1,7 @@
 ﻿namespace Lykke.Tools.ChainalysisHistoryExporter.Configuration
 {
-    public class ServicesSettings
+    public class LtcSettings
     {
-        public string Assets { get; set; }
+        public string InsightApiUrl { get; set; }
     }
 }

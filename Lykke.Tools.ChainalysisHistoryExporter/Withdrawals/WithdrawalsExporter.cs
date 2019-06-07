@@ -12,7 +12,7 @@ using Polly;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
 {
-    internal class WithdrawalsExporter
+    public class WithdrawalsExporter
     {
         private readonly ILogger<WithdrawalsExporter> _logger;
         private readonly Report _report;

@@ -13,7 +13,7 @@ using Transaction = Lykke.Tools.ChainalysisHistoryExporter.Reporting.Transaction
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin
 {
-    internal class BtcDepositsHistoryProvider : IDepositsHistoryProvider
+    public class BtcDepositsHistoryProvider : IDepositsHistoryProvider
     {
         private readonly ILogger<BtcDepositsHistoryProvider> _logger;
         private readonly CustomQBitNinjaClient _client;

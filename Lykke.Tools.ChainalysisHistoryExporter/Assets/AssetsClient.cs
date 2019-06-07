@@ -9,14 +9,14 @@ using Microsoft.Extensions.Options;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Assets
 {
-    internal class AssetsProvider
+    public class AssetsClient
     {
-        private readonly ILogger<AssetsProvider> _logger;
+        private readonly ILogger<AssetsClient> _logger;
         private readonly IOptions<ServicesSettings> _settings;
         private Dictionary<string, Asset> _assets;
 
-        public AssetsProvider(
-            ILogger<AssetsProvider> logger, 
+        public AssetsClient(
+            ILogger<AssetsClient> logger, 
             IOptions<ServicesSettings> settings)
         {
             _logger = logger;

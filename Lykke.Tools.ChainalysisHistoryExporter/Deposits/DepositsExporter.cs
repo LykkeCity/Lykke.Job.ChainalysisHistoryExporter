@@ -14,7 +14,7 @@ using Polly;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 {
-    internal class DepositsExporter : IDisposable
+    public class DepositsExporter : IDisposable
     {
         private readonly ILogger<DepositsExporter> _logger;
         private readonly Report _report;

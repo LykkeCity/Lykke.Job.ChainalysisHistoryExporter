@@ -2,7 +2,7 @@
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Configuration
 {
-    internal class WithdrawalHistoryProvidersSettings
+    public class WithdrawalHistoryProvidersSettings
     {
         public IReadOnlyCollection<string> Providers { get; set; }
     }

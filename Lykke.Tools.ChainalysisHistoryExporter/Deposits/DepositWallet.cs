@@ -2,7 +2,7 @@
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 {
-    internal class DepositWallet : IEquatable<DepositWallet>
+    public class DepositWallet : IEquatable<DepositWallet>
     {
         public Guid UserId { get; }
         public string Address { get; }

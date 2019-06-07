@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProviders
 {
-    internal class BilCashoutsBatchWithdrawalsHistoryProvider : IWithdrawalsHistoryProvider
+    public class BilCashoutsBatchWithdrawalsHistoryProvider : IWithdrawalsHistoryProvider
     {
         #region Entities
 

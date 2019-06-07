@@ -6,6 +6,7 @@ using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum;
+using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.LiteCoin;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Lykke.Tools.ChainalysisHistoryExporter.Withdrawals;
@@ -16,7 +17,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter
 {
-    internal class Program : IDisposable
+    public class Program : IDisposable
     {
         private IServiceProvider ServiceProvider { get; }
 
@@ -32,12 +33,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.AddSingleton<Report>();
             services.AddSingleton<Exporter>();
             services.AddSingleton<BlockchainsProvider>();
-            services.AddSingleton<AssetsProvider>();
+            services.AddSingleton<AssetsClient>();
             services.AddTransient<WithdrawalsExporter>();
             services.AddTransient<DepositsExporter>();
             
             services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutWithdrawalsHistoryProvider>();
             services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutsBatchWithdrawalsHistoryProvider>();
+            //services.AddTransient<IWithdrawalsHistoryProvider, HistoryServiceWithdrawalsHistoryProvider>();
             
             services.AddTransient<IDepositWalletsProvider, BilAzureDepositWalletsProvider>();
             services.AddTransient<IDepositWalletsProvider, BilMongoDepositWalletsProvider>();
@@ -46,6 +48,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
 
             services.AddTransient<IDepositsHistoryProvider, BtcDepositsHistoryProvider>();
             services.AddTransient<IDepositsHistoryProvider, EthDepositsHistoryProvider>();
+            services.AddTransient<IDepositsHistoryProvider, LtcDepositsHistoryProvider>();
             
             services.AddLogging(logging =>
             {
@@ -61,6 +64,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.Configure<WithdrawalHistoryProvidersSettings>(configuration.GetSection("WithdrawalHistoryProviders"));
             services.Configure<BtcSettings>(configuration.GetSection("Btc"));
             services.Configure<EthSettings>(configuration.GetSection("Eth"));
+            services.Configure<LtcSettings>(configuration.GetSection("Ltc"));
 
             ServiceProvider = services.BuildServiceProvider();
         }
@@ -76,7 +80,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
         private async Task RunAsync()
         {
             var exporter = ServiceProvider.GetRequiredService<Exporter>();
-            var assetsProvider = ServiceProvider.GetRequiredService<AssetsProvider>();
+            var assetsProvider = ServiceProvider.GetRequiredService<AssetsClient>();
 
             await assetsProvider.InitializeAsync();
 

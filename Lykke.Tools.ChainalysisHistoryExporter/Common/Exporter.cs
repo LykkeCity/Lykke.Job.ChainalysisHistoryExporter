@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 {
-    internal class Exporter
+    public class Exporter
     {
         private readonly Report _report;
         private readonly ILogger<Exporter> _logger;

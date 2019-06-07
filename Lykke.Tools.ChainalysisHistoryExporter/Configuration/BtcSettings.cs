@@ -1,6 +1,6 @@
 ﻿namespace Lykke.Tools.ChainalysisHistoryExporter.Configuration
 {
-    internal class BtcSettings
+    public class BtcSettings
     {
         public string Network { get; set; }
 

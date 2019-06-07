@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
 {
-    internal class EthDepositsHistoryProvider : IDepositsHistoryProvider
+    public class EthDepositsHistoryProvider : IDepositsHistoryProvider
     {
         private enum ContinuationStage
         {

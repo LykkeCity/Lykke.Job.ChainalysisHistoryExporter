@@ -1,7 +1,7 @@
 ﻿namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    internal class SamuraiOperationsHistoryResponse
+    public class SamuraiOperationsHistoryResponse
     {
         public SamuraiOperation[] History { get; set; }
     }

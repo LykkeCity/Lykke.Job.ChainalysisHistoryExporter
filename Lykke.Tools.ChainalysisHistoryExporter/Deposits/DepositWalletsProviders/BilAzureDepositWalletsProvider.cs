@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
 {
-    internal class BilAzureDepositWalletsProvider : IDepositWalletsProvider
+    public class BilAzureDepositWalletsProvider : IDepositWalletsProvider
     {
         #region Entities
 

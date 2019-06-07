@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
 {
-    internal class Report
+    public class Report
     {
         private readonly ILogger<Report> _logger;
         private readonly IOptions<ReportSettings> _settings;

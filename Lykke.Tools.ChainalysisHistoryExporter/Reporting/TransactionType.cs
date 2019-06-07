@@ -1,6 +1,6 @@
 ﻿namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
 {
-    internal enum TransactionType
+    public enum TransactionType
     {
         Deposit,
         Withdrawal

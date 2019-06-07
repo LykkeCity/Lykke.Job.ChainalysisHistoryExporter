@@ -2,7 +2,7 @@
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Configuration
 {
-    internal class DepositHistoryProvidersSettings
+    public class DepositHistoryProvidersSettings
     {
         public IReadOnlyCollection<string> Providers { get; set; }
     }

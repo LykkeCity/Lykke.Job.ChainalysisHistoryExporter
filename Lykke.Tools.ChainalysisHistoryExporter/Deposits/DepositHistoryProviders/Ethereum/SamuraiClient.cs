@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
 {
-    internal class SamuraiClient
+    public class SamuraiClient
     {
         private readonly string _url;
 

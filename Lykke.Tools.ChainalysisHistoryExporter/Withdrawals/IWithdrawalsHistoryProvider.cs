@@ -4,7 +4,7 @@ using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
 {
-    internal interface IWithdrawalsHistoryProvider
+    public interface IWithdrawalsHistoryProvider
     {
         Task<PaginatedList<Transaction>> GetHistoryAsync(string continuation);
     }
