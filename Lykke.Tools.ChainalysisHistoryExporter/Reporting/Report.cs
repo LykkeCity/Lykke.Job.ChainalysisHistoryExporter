@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Microsoft.Extensions.Logging;
@@ -13,6 +15,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
         private readonly ILogger<Report> _logger;
         private readonly IOptions<ReportSettings> _settings;
         private readonly HashSet<Transaction> _transactions;
+        private bool _saved;
 
         public Report(
             ILogger<Report> logger,
@@ -25,11 +28,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
 
         public void AddTransaction(Transaction tx)
         {
+            if (_saved)
+            {
+                throw new InvalidOperationException("Report already saved");
+            }
+
             _transactions.Add(tx);
         }
 
         public async Task SaveAsync()
         {
+            _saved = true;
+
             var filePath = _settings.Value.FilePath;
 
             _logger.LogInformation($"Saving report to {filePath}...");

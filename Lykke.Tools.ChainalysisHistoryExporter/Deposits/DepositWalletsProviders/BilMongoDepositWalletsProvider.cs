@@ -73,8 +73,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProvider
 
         public BilMongoDepositWalletsProvider(
             BlockchainsProvider blockchainsProvider,
-            IOptions<MongoStorageSettings> settings,
-            IOptions<DepositWalletProvidersSettings> depositWalletProvidersSettings)
+            IOptions<MongoStorageSettings> settings)
         {
             _blockchainsProvider = blockchainsProvider;
 

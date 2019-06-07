@@ -5,6 +5,7 @@ using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin;
+using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.BitcoinCash;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.LiteCoin;
 using Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders;
@@ -49,6 +50,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.AddTransient<IDepositsHistoryProvider, BtcDepositsHistoryProvider>();
             services.AddTransient<IDepositsHistoryProvider, EthDepositsHistoryProvider>();
             services.AddTransient<IDepositsHistoryProvider, LtcDepositsHistoryProvider>();
+            services.AddTransient<IDepositsHistoryProvider, BchDepositsHistoryProvider>();
             
             services.AddLogging(logging =>
             {
@@ -65,6 +67,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.Configure<BtcSettings>(configuration.GetSection("Btc"));
             services.Configure<EthSettings>(configuration.GetSection("Eth"));
             services.Configure<LtcSettings>(configuration.GetSection("Ltc"));
+            services.Configure<BchSettings>(configuration.GetSection("Bch"));
 
             ServiceProvider = services.BuildServiceProvider();
         }

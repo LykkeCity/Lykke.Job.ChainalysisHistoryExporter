@@ -16,13 +16,12 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
 {
     public class LtcDepositsHistoryProvider : IDepositsHistoryProvider
     {
-        private readonly ILogger<LtcDepositsHistoryProvider> _logger;
-
         private class ContinuationToken
         {
             public int Page { get; set; }
         }
 
+        private readonly ILogger<LtcDepositsHistoryProvider> _logger;
         private readonly InsightApiClient _insightApi;
         private readonly Blockchain _liteCoin;
 
@@ -64,7 +63,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
 
                 if (responseMessage == "Invalid address. Code:-5")
                 {
-                    _logger.LogWarning($"Insight API treated address [{depositWallet.Address}] like invalid. Skipping");
+                    _logger.LogWarning($"Insight API treated address [{depositWallet.Address}] as invalid. Skipping");
                 }
                 else
                 {

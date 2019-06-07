@@ -70,6 +70,8 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                 }
             }
 
+            await Task.WhenAll(tasks);
+
             _logger.LogInformation($"Deposits exporting done. {_processedWalletsCount} deposit wallets processed. {_exportedDepositsCount} deposits exported");
         }
 
