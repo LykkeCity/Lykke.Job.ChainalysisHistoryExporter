@@ -40,7 +40,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             
             services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutWithdrawalsHistoryProvider>();
             services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutsBatchWithdrawalsHistoryProvider>();
-            //services.AddTransient<IWithdrawalsHistoryProvider, HistoryServiceWithdrawalsHistoryProvider>();
+            services.AddTransient<IWithdrawalsHistoryProvider, CashOperationsWithdrawalsHistoryProvider>();
             
             services.AddTransient<IDepositWalletsProvider, BilAzureDepositWalletsProvider>();
             services.AddTransient<IDepositWalletsProvider, BilMongoDepositWalletsProvider>();
@@ -72,6 +72,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             ServiceProvider = services.BuildServiceProvider();
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private static async Task Main(string[] args)
         {
             using (var program = new Program())
