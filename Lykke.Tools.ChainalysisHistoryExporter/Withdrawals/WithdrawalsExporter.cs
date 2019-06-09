@@ -15,18 +15,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
     public class WithdrawalsExporter
     {
         private readonly ILogger<WithdrawalsExporter> _logger;
-        private readonly Report _report;
+        private readonly TransactionsReport _transactionsReport;
         private readonly IReadOnlyCollection<IWithdrawalsHistoryProvider> _withdrawalsHistoryProviders;
         private int _exportedWithdrawalsCount;
 
         public WithdrawalsExporter(
             ILogger<WithdrawalsExporter> logger,
-            Report report,
+            TransactionsReport transactionsReport,
             IEnumerable<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders,
             IOptions<WithdrawalHistoryProvidersSettings> withdrawalsHistoryProvidersSettings)
         {
             _logger = logger;
-            _report = report;
+            _transactionsReport = transactionsReport;
             _withdrawalsHistoryProviders = withdrawalsHistoryProviders
                 .Where(x => withdrawalsHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
                 .ToArray();
@@ -66,7 +66,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
 
                 foreach (var tx in transactions.Items)
                 {
-                    _report.AddTransaction(tx);
+                    _transactionsReport.AddTransaction(tx);
 
                     var exportedWithdrawalsCount = Interlocked.Increment(ref _exportedWithdrawalsCount);
 

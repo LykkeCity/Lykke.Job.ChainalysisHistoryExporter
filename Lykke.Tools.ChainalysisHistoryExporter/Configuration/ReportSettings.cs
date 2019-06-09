@@ -2,6 +2,7 @@
 {
     public class ReportSettings
     {
-        public string FilePath { get; set; }
+        public string TransactionsFilePath { get; set; }
+        public string DepositWalletsFilePath { get; set; }
     }
 }

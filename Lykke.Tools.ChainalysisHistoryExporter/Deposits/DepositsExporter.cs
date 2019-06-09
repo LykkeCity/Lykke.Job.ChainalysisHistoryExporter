@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
@@ -17,7 +15,8 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
     public class DepositsExporter : IDisposable
     {
         private readonly ILogger<DepositsExporter> _logger;
-        private readonly Report _report;
+        private readonly TransactionsReport _transactionsReport;
+        private readonly DepositWalletsReport _depositWalletsReport;
         private readonly IReadOnlyCollection<IDepositWalletsProvider> _depositWalletsProviders;
         private readonly IReadOnlyCollection<IDepositsHistoryProvider> _depositsHistoryProviders;
         private readonly SemaphoreSlim _concurrencySemaphore;
@@ -27,14 +26,16 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
         public DepositsExporter(
             ILogger<DepositsExporter> logger,
-            Report report,
+            TransactionsReport transactionsReport,
+            DepositWalletsReport depositWalletsReport,
             IEnumerable<IDepositWalletsProvider> depositWalletsProviders,
             IEnumerable<IDepositsHistoryProvider> depositsHistoryProviders,
             IOptions<DepositWalletProvidersSettings> depositWalletsProvidersSettings,
             IOptions<DepositHistoryProvidersSettings> depositHistoryProvidersSettings)
         {
             _logger = logger;
-            _report = report;
+            _transactionsReport = transactionsReport;
+            _depositWalletsReport = depositWalletsReport;
             _depositWalletsProviders = depositWalletsProviders
                 .Where(x => depositWalletsProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
                 .ToArray();
@@ -51,7 +52,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
             _totalDepositWalletsCount = depositWallets.Count;
 
-            await SaveDepositWalletsAsync(depositWallets);
+            await _depositWalletsReport.SaveAsync(depositWallets);
 
             var tasks = new List<Task>(512);
 
@@ -75,31 +76,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             _logger.LogInformation($"Deposits exporting done. {_processedWalletsCount} deposit wallets processed. {_exportedDepositsCount} deposits exported");
         }
 
-        private static async Task SaveDepositWalletsAsync(IReadOnlyCollection<DepositWallet> depositWallets)
-        {
-            var stream = File.Open("deposit-wallets.csv", FileMode.Create, FileAccess.Write, FileShare.Read);
-            
-            using(var writer = new StreamWriter(stream, Encoding.UTF8))
-            {
-                foreach (var wallet in depositWallets)
-                {
-                    await writer.WriteLineAsync($"{wallet.UserId},{wallet.CryptoCurrency},{wallet.Address}");
-                }
-            }
-        }
-
         public void Dispose()
         {
             _concurrencySemaphore?.Dispose();
         }
 
-        private async Task<IReadOnlyCollection<DepositWallet>> LoadDepositWalletsAsync()
+        private async Task<ISet<DepositWallet>> LoadDepositWalletsAsync()
         {
             _logger.LogInformation("Loading deposit wallets...");
 
             var allWallets = new HashSet<DepositWallet>(131072); // 2 ^ 17
 
-            int loadedDepositWalletsCount = 0;
+            var loadedDepositWalletsCount = 0;
 
             async Task<IReadOnlyCollection<DepositWallet>> LoadProviderWalletsAsync(IDepositWalletsProvider provider)
             {
@@ -184,7 +172,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
                         foreach (var tx in transactions.Items)
                         {
-                            _report.AddTransaction(tx);
+                            _transactionsReport.AddTransaction(tx);
 
                             Interlocked.Increment(ref _exportedDepositsCount);
                             ++processedWalletTransactionsCount;

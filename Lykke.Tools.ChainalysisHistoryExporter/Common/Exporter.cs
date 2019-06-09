@@ -10,18 +10,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 {
     public class Exporter
     {
-        private readonly Report _report;
+        private readonly TransactionsReport _transactionsReport;
         private readonly ILogger<Exporter> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly DepositsExporter _depositsExporter;
 
         public Exporter(
-            Report report,
+            TransactionsReport transactionsReport,
             ILogger<Exporter> logger,
             IServiceProvider serviceProvider, 
             DepositsExporter depositsExporter)
         {
-            _report = report;
+            _transactionsReport = transactionsReport;
             _logger = logger;
             _serviceProvider = serviceProvider;
             _depositsExporter = depositsExporter;
@@ -43,7 +43,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 
             await _depositsExporter.ExportAsync();
 
-            await _report.SaveAsync();
+            await _transactionsReport.SaveAsync();
 
             _logger.LogInformation($"Exporting done.");
         }

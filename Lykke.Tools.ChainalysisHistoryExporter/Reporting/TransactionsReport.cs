@@ -10,15 +10,15 @@ using Microsoft.Extensions.Options;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
 {
-    public class Report
+    public class TransactionsReport
     {
-        private readonly ILogger<Report> _logger;
+        private readonly ILogger<TransactionsReport> _logger;
         private readonly IOptions<ReportSettings> _settings;
         private readonly HashSet<Transaction> _transactions;
         private bool _saved;
 
-        public Report(
-            ILogger<Report> logger,
+        public TransactionsReport(
+            ILogger<TransactionsReport> logger,
             IOptions<ReportSettings> settings)
         {
             _logger = logger;
@@ -40,9 +40,9 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
         {
             _saved = true;
 
-            var filePath = _settings.Value.FilePath;
+            var filePath = _settings.Value.TransactionsFilePath;
 
-            _logger.LogInformation($"Saving report to {filePath}...");
+            _logger.LogInformation($"Saving transactions report to {filePath}...");
 
             var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             using (var writer = new StreamWriter(stream, Encoding.UTF8))
@@ -55,7 +55,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
                 }
             }
 
-            _logger.LogInformation($"Report saving done. {_transactions.Count} unique transactions saved");
+            _logger.LogInformation($"Transactions report saving done. {_transactions.Count} unique transactions saved");
         }
 
         private static string GetTransactionType(Transaction tx)
