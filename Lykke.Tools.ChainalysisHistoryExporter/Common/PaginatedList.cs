@@ -5,6 +5,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 {
     public static class PaginatedList
     {
+        public static PaginatedList<TItem> From<TItem>(string continuation, IReadOnlyCollection<TItem> items)
+        {
+            return new PaginatedList<TItem>(continuation, items);
+        }
+
         public static PaginatedList<TItem> From<TItem, TContinuation>(TContinuation continuationToken, IReadOnlyCollection<TItem> items)
         {
             var continuation = continuationToken != null
