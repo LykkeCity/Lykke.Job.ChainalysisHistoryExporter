@@ -76,20 +76,34 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
         // ReSharper disable once UnusedParameter.Local
         private static async Task Main(string[] args)
         {
-            using (var program = new Program())
+            try
             {
-                await program.RunAsync();
+                using (var program = new Program())
+                {
+                    await program.RunAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
 
         private async Task RunAsync()
         {
-            var exporter = ServiceProvider.GetRequiredService<Exporter>();
-            var assetsProvider = ServiceProvider.GetRequiredService<AssetsClient>();
+            try
+            {
+                var exporter = ServiceProvider.GetRequiredService<Exporter>();
+                var assetsProvider = ServiceProvider.GetRequiredService<AssetsClient>();
 
-            await assetsProvider.InitializeAsync();
+                await assetsProvider.InitializeAsync();
 
-            await exporter.ExportAsync();
+                await exporter.ExportAsync();
+            }
+            catch (Exception ex)
+            {
+                ServiceProvider.GetRequiredService<ILogger<Program>>().LogError(ex, string.Empty);
+            }
         }
 
         public void Dispose()
