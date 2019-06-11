@@ -73,11 +73,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
             var transactions = response.Results
                 .Where(operation => 
                     operation.Amount < 0 && 
-                    operation.AddressTo != null && 
-                    operation.BlockChainHash != null &&
+                    !string.IsNullOrWhiteSpace(operation.AddressTo) && 
+                    !string.IsNullOrWhiteSpace(operation.BlockChainHash) &&
                     operation.AddressTo != operation.AddressFrom &&
-                    operation.AssetId != null &&
-                    operation.ClientId != null)
+                    !string.IsNullOrWhiteSpace(operation.AssetId) &&
+                    !string.IsNullOrWhiteSpace(operation.ClientId))
                 .Select(operation =>
                 {
                     var blockchain = _blockchainsProvider.GetByAssetIdOrDefault(operation.AssetId);
