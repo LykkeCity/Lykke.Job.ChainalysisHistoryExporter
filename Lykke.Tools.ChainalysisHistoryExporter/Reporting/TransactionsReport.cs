@@ -33,6 +33,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
                 throw new InvalidOperationException("Report already saved");
             }
 
+            if (string.IsNullOrWhiteSpace(tx.Hash) ||
+                string.IsNullOrWhiteSpace(tx.CryptoCurrency) ||
+                tx.UserId == Guid.Empty)
+            {
+                return;
+            }
+
             _transactions.Add(tx);
         }
 
@@ -47,7 +54,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
             var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             using (var writer = new StreamWriter(stream, Encoding.UTF8))
             {
-                await writer.WriteLineAsync("user-id,cryptocurrency,tx-type,tx-hash,output-address");
+                await writer.WriteLineAsync("user-id,cryptocurrency,transaction-type,transaction-hash,output-address");
 
                 foreach (var tx in _transactions)
                 {

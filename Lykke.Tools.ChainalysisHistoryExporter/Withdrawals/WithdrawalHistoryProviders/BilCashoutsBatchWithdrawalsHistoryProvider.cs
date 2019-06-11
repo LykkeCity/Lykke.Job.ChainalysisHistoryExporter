@@ -125,7 +125,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
                         return Enumerable.Empty<Transaction>();
                     }
 
-                    if (operationExecution.TransactionHash == null)
+                    if (string.IsNullOrWhiteSpace(operationExecution.TransactionHash))
                     {
                         _logger.LogWarning($"Transaction hash for cashouts batch {cashoutsBatch.BatchId} is empty, skipping");
 

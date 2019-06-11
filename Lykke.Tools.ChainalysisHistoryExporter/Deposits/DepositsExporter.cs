@@ -108,7 +108,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                         // ReSharper disable once AccessToModifiedClosure
                         .ExecuteAsync(async () => await provider.GetWalletsAsync(wallets?.Continuation));
 
-                    foreach (var wallet in wallets.Items.Where(x => x.Address != null))
+                    foreach (var wallet in wallets.Items.Where(x => !string.IsNullOrWhiteSpace(x.Address)))
                     {
                         allWalletsOfProvider.Add(wallet);
 

@@ -69,7 +69,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryPr
             var response = await _table.ExecuteQuerySegmentedAsync(query, continuationToken);
 
             var transactions = response.Results
-                .Where(cashout => cashout.Result == CashoutResult.Success && cashout.TransactionHash != null)
+                .Where(cashout => cashout.Result == CashoutResult.Success && !string.IsNullOrWhiteSpace(cashout.TransactionHash))
                 .Select(cashout =>
                 {
                     var blockchain = _blockchainsProvider.GetByBilIdOrDefault(cashout.BlockchainType);
