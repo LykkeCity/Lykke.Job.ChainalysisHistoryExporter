@@ -35,6 +35,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
         public async Task ExportAsync()
         {
             _logger.LogInformation("Exporting withdrawals...");
+            _logger.LogInformation($"Withdrawals history providers: {string.Join(", ", _withdrawalsHistoryProviders.Select(x => x.GetType().Name))}");
 
             var tasks = new List<Task>();
 

@@ -57,6 +57,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             var tasks = new List<Task>(512);
 
             _logger.LogInformation("Exporting deposits...");
+            _logger.LogInformation($"Deposits history providers: {string.Join(", ", _depositsHistoryProviders.Select(x => x.GetType().Name))}");
 
             foreach (var wallet in depositWallets)
             {
@@ -84,6 +85,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
         private async Task<ISet<DepositWallet>> LoadDepositWalletsAsync()
         {
             _logger.LogInformation("Loading deposit wallets...");
+            _logger.LogInformation($"Deposit wallets providers: {string.Join(", ", _depositWalletsProviders.Select(x => x.GetType().Name))}");
 
             var allWallets = new HashSet<DepositWallet>(131072); // 2 ^ 17
 
