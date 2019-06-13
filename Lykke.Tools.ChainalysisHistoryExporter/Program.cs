@@ -43,7 +43,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.AddSingleton<AssetsClient>();
             services.AddTransient<WithdrawalsExporter>();
             services.AddTransient<DepositsExporter>();
-            services.AddTransient<AddressNormalizer>();
+            services.AddSingleton<AddressNormalizer>();
 
             services.AddTransient<IAddressNormalizer, GeneralAddressNormalizer>();
             services.AddTransient<IAddressNormalizer, BtcAddressNormalizer>();

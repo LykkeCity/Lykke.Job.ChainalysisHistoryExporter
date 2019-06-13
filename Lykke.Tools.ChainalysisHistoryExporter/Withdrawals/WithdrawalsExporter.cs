@@ -92,6 +92,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
 
         private Transaction NormalizeTransactionOrDefault(Transaction tx)
         {
+            if (string.IsNullOrWhiteSpace(tx.Hash) ||
+                string.IsNullOrWhiteSpace(tx.CryptoCurrency) ||
+                tx.UserId == Guid.Empty)
+            {
+                return null;
+            }
+
             var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency);
             if (outputAddress == null)
             {

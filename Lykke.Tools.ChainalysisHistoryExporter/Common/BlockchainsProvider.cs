@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Lykke.Tools.ChainalysisHistoryExporter.Assets;
+using NBitcoin;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 {
@@ -9,6 +10,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
         private readonly AssetsClient _assetsClient;
         private readonly Dictionary<string, Blockchain> _byBillId;
         private readonly Dictionary<string, Blockchain> _byAssetBlockchain;
+        private readonly Dictionary<string, Blockchain> _byAssetReferences;
 
         public BlockchainsProvider(AssetsClient assetsClient)
         {
@@ -17,13 +19,17 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
             var blockchains = new List<Blockchain>
             {
                 new Blockchain {CryptoCurrency = "BTC", BilId = "Bitcoin"},
-                new Blockchain {CryptoCurrency = "ETH", BilId = "Ethereum", AssetBlockchain = "Ethereum"},
+                new Blockchain {CryptoCurrency = "ETH", BilId = "Ethereum", AssetBlockchain = "Ethereum", AssetReferences = new [] { "ERC20", "ERC223" }},
                 new Blockchain {CryptoCurrency = "LTC", BilId = "LiteCoin"},
                 new Blockchain {CryptoCurrency = "BCH", BilId = "BitcoinCash"}
             };
 
             _byBillId = blockchains.ToDictionary(x => x.BilId);
             _byAssetBlockchain = blockchains.Where(x => x.AssetBlockchain != null).ToDictionary(x => x.AssetBlockchain);
+            _byAssetReferences = blockchains
+                .Where(x => x.AssetReferences != null)
+                .SelectMany(x => x.AssetReferences.Select(a => new {AssetId = a, Blockchain = x}))
+                .ToDictionary(x => x.AssetId, x => x.Blockchain);
         }
 
         public Blockchain GetByBilIdOrDefault(string bilId)
@@ -84,6 +90,28 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
             _byAssetBlockchain.TryGetValue(assetBlockchain, out var blockchain);
 
             return blockchain;
+        }
+
+        public Blockchain GuessBlockchainOrDefault(string assetReference)
+        {
+            if (assetReference == null)
+            {
+                return null;
+            }
+
+            var blockchain = GetByBilIdOrDefault(assetReference);
+            if (blockchain != null)
+            {
+                return blockchain;
+            }
+
+            _byAssetReferences.TryGetValue(assetReference, out blockchain);
+            if (blockchain != null)
+            {
+                return blockchain;
+            }
+
+            return GetByAssetIdOrDefault(assetReference);
         }
     }
 }

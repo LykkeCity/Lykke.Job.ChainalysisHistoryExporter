@@ -46,6 +46,7 @@ namespace InvalidAddressRemover
             var blockchainProvider = new BlockchainsProvider(assetsClient);
             var addressNormalizer = new AddressNormalizer
             (
+                new Logger<AddressNormalizer>(),
                 new IAddressNormalizer[]
                 {
                     new GeneralAddressNormalizer(),

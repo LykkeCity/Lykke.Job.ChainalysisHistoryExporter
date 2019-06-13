@@ -159,6 +159,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
         private DepositWallet NormalizeWalletOrDefault(DepositWallet wallet)
         {
+            if (string.IsNullOrWhiteSpace(wallet.Address) ||
+                string.IsNullOrWhiteSpace(wallet.CryptoCurrency) ||
+                wallet.UserId == Guid.Empty)
+            {
+                return null;
+            }
+
             var address = _addressNormalizer.NormalizeOrDefault(wallet.Address, wallet.CryptoCurrency);
             if (address == null)
             {

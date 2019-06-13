@@ -59,8 +59,8 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProvider
             var transactions = response.Results
                 .Select(wallet =>
                 {
-                    var assetId = wallet.AssetId.Split(new[] {' '}).FirstOrDefault();
-                    var blockchain = _blockchainsProvider.GetByAssetIdOrDefault(assetId);
+                    var assetReference = wallet.AssetId.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                    var blockchain = _blockchainsProvider.GuessBlockchainOrDefault(assetReference);
 
                     if (blockchain == null)
                     {
