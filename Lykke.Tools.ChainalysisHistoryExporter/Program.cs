@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Lykke.Tools.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Tools.ChainalysisHistoryExporter.Assets;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
@@ -15,6 +16,7 @@ using Lykke.Tools.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProvid
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NBitcoin.Altcoins;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter
 {
@@ -24,6 +26,9 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
 
         private Program()
         {
+            Litecoin.Instance.EnsureRegistered();
+            BCash.Instance.EnsureRegistered();
+
             var configurationBuilder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
 
@@ -38,6 +43,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
             services.AddSingleton<AssetsClient>();
             services.AddTransient<WithdrawalsExporter>();
             services.AddTransient<DepositsExporter>();
+            services.AddTransient<AddressNormalizer>();
+
+            services.AddTransient<IAddressNormalizer, GeneralAddressNormalizer>();
+            services.AddTransient<IAddressNormalizer, BtcAddressNormalizer>();
+            services.AddTransient<IAddressNormalizer, BchAddressNormalizer>();
+            services.AddTransient<IAddressNormalizer, LtcAddressNormalizer>();
+            services.AddTransient<IAddressNormalizer, EthAddressNormalizer>();
             
             services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutWithdrawalsHistoryProvider>();
             services.AddTransient<IWithdrawalsHistoryProvider, BilCashoutsBatchWithdrawalsHistoryProvider>();

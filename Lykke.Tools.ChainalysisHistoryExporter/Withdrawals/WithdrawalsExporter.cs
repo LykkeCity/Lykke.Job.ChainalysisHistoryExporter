@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lykke.Tools.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
+using Transaction = Lykke.Tools.ChainalysisHistoryExporter.Reporting.Transaction;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
 {
@@ -16,6 +18,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
     {
         private readonly ILogger<WithdrawalsExporter> _logger;
         private readonly TransactionsReport _transactionsReport;
+        private readonly AddressNormalizer _addressNormalizer;
         private readonly IReadOnlyCollection<IWithdrawalsHistoryProvider> _withdrawalsHistoryProviders;
         private int _exportedWithdrawalsCount;
 
@@ -23,10 +26,12 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
             ILogger<WithdrawalsExporter> logger,
             TransactionsReport transactionsReport,
             IEnumerable<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders,
-            IOptions<WithdrawalHistoryProvidersSettings> withdrawalsHistoryProvidersSettings)
+            IOptions<WithdrawalHistoryProvidersSettings> withdrawalsHistoryProvidersSettings,
+            AddressNormalizer addressNormalizer)
         {
             _logger = logger;
             _transactionsReport = transactionsReport;
+            _addressNormalizer = addressNormalizer;
             _withdrawalsHistoryProviders = withdrawalsHistoryProviders
                 .Where(x => withdrawalsHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
                 .ToArray();
@@ -67,7 +72,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
 
                 foreach (var tx in transactions.Items)
                 {
-                    _transactionsReport.AddTransaction(tx);
+                    var normalizedTransaction = NormalizeTransactionOrDefault(tx);
+                    if (normalizedTransaction == null)
+                    {
+                        continue;
+                    }
+
+                    _transactionsReport.AddTransaction(normalizedTransaction);
 
                     var exportedWithdrawalsCount = Interlocked.Increment(ref _exportedWithdrawalsCount);
 
@@ -77,6 +88,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
                     }
                 }
             } while (transactions.Continuation != null);
+        }
+
+        private Transaction NormalizeTransactionOrDefault(Transaction tx)
+        {
+            var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency);
+            if (outputAddress == null)
+            {
+                _logger.LogWarning($"Address {tx.OutputAddress} is not valid for {tx.CryptoCurrency}, skipping");
+                return null;
+            }
+
+            return new Transaction(tx.CryptoCurrency, tx.Hash, tx.UserId, outputAddress, tx.Type);
         }
     }
 }

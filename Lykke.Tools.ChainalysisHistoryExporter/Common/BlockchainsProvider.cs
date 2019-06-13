@@ -65,23 +65,15 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
             if (asset.BlockchainIntegrationLayerId != null)
             {
                 var result = GetByBilIdOrDefault(asset.BlockchainIntegrationLayerId);
-                
-                if (result != null)
-                {
-                    return result;
-                }
-            }
 
-            // TODO: Look at Service.Operations how full list of ERC20 tokens is obtained.
+                return result;
+            }
 
             if (asset.Blockchain != null)
             {
                 var result = GetByAssetBlockchainOrDefault(asset.Blockchain);
-                
-                if (result != null)
-                {
-                    return result;
-                }
+
+                return result;
             }
 
             return null;

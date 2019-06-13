@@ -78,40 +78,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
         {
             return Post<BroadcastResponse>("transactions", Encoders.Hex.EncodeData(transaction.ToBytes()));
         }
-
-
-        public Task<BalanceModel> GetBalance(BalanceSelector dest, bool unspentOnly = false, string continuation = null)
+        
+        public Task<BalanceModel> GetBalance(string wallet, bool unspentOnly = false, string continuation = null)
         {
-            if (dest == null)
-                throw new ArgumentNullException("dest");
+            if (wallet == null)
+                throw new ArgumentNullException("wallet");
 
-            var url = "balances/" + EscapeUrlPart(dest.ToString()) + CreateParameters("unspentOnly", unspentOnly)
+            var url = "balances/" + EscapeUrlPart(wallet) + CreateParameters("unspentOnly", unspentOnly)
                       + (!string.IsNullOrEmpty(continuation)? $"&continuation={continuation}": "");
 
             return Get<BalanceModel>(url);
         }
-
-        public Task<BalanceModel> GetBalance(string wallet, bool unspentOnly = false)
-        {
-            if (wallet == null)
-                throw new ArgumentNullException("wallet");
-            return GetBalance(new BalanceSelector(new WalletName(wallet)), unspentOnly);
-        }
-
-        public Task<BalanceModel> GetBalance(Script dest, bool unspentOnly = false)
-        {
-            if (dest == null)
-                throw new ArgumentNullException("dest");
-            return GetBalance(new BalanceSelector(dest), unspentOnly);
-        }
-
-        public Task<BalanceModel> GetBalance(IDestination dest, bool unspentOnly = false, string continuation = null)
-        {
-            if (dest == null)
-                throw new ArgumentNullException("dest");
-            return GetBalance(new BalanceSelector(dest), unspentOnly, continuation);
-        }
-
+        
         public Task<BalanceModel> GetBalanceBetween(
             BalanceSelector dest,
             BlockFeature from = null,
