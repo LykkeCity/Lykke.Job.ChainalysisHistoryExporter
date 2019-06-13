@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lykke.Tools.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
@@ -17,6 +18,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
         private readonly ILogger<DepositsExporter> _logger;
         private readonly TransactionsReport _transactionsReport;
         private readonly DepositWalletsReport _depositWalletsReport;
+        private readonly AddressNormalizer _addressNormalizer;
         private readonly IReadOnlyCollection<IDepositWalletsProvider> _depositWalletsProviders;
         private readonly IReadOnlyCollection<IDepositsHistoryProvider> _depositsHistoryProviders;
         private readonly SemaphoreSlim _concurrencySemaphore;
@@ -28,6 +30,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             ILogger<DepositsExporter> logger,
             TransactionsReport transactionsReport,
             DepositWalletsReport depositWalletsReport,
+            AddressNormalizer addressNormalizer,
             IEnumerable<IDepositWalletsProvider> depositWalletsProviders,
             IEnumerable<IDepositsHistoryProvider> depositsHistoryProviders,
             IOptions<DepositWalletProvidersSettings> depositWalletsProvidersSettings,
@@ -36,6 +39,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             _logger = logger;
             _transactionsReport = transactionsReport;
             _depositWalletsReport = depositWalletsReport;
+            _addressNormalizer = addressNormalizer;
             _depositWalletsProviders = depositWalletsProviders
                 .Where(x => depositWalletsProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
                 .ToArray();
@@ -108,8 +112,14 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                         // ReSharper disable once AccessToModifiedClosure
                         .ExecuteAsync(async () => await provider.GetWalletsAsync(wallets?.Continuation));
 
-                    foreach (var wallet in wallets.Items.Where(x => !string.IsNullOrWhiteSpace(x.Address)))
+                    foreach (var wallet in wallets.Items)
                     {
+                        var normalizedWallet = NormalizeWalletOrDefault(wallet);
+                        if (normalizedWallet == null)
+                        {
+                            continue;
+                        }
+
                         allWalletsOfProvider.Add(wallet);
 
                         var currentLoadedDepositWalletsCount = Interlocked.Increment(ref loadedDepositWalletsCount);
@@ -145,6 +155,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             _logger.LogInformation($"Deposit wallets loading done. {allWallets.Count} unique deposit wallets loaded");
 
             return allWallets;
+        }
+
+        private DepositWallet NormalizeWalletOrDefault(DepositWallet wallet)
+        {
+            var address = _addressNormalizer.NormalizeOrDefault(wallet.Address, wallet.CryptoCurrency);
+            if (address == null)
+            {
+                _logger.LogWarning($"Address {wallet.Address} is not a valid address for {wallet.CryptoCurrency}, skipping");
+                return null;
+            }
+
+            return new DepositWallet(wallet.UserId, address, wallet.CryptoCurrency);
         }
 
         private async Task ProcessDepositWalletAsync(DepositWallet wallet)

@@ -53,6 +53,7 @@ Add and configure ```appsettings.json``` to the /Lykke.Tools.ChainalysisHistoryE
     "SamuraiUrl": "<EthereumSamuraiUrl>"
   },
   "Ltc": {
+    "Network": "ltc-main",
     "InsightApiUrl": "<LiteCoinInsightApiUrlWithSuffix>"
   },
   "Bch": {

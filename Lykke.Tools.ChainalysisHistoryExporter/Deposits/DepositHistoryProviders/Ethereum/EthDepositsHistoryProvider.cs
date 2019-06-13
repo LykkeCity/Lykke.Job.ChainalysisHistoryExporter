@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Lykke.Tools.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
@@ -25,11 +26,14 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
 
         private readonly SamuraiClient _samuraiClient;
         private readonly Blockchain _ethereum;
+        private readonly AddressNormalizer _addressNormalizer;
 
         public EthDepositsHistoryProvider(
             BlockchainsProvider blockchainsProvider,
-            IOptions<EthSettings> settings)
+            IOptions<EthSettings> settings,
+            AddressNormalizer addressNormalizer)
         {
+            _addressNormalizer = addressNormalizer;
             _samuraiClient = new SamuraiClient(settings.Value.SamuraiUrl);
             _ethereum = blockchainsProvider.GetEthereum();
         }
@@ -117,7 +121,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
             var address = depositWallet.Address;
             var operations = await _samuraiClient.GetErc20OperationsHistory(depositWallet.Address, continuation);
             var transactions = operations.Items
-                .Where(x => string.Equals(x.To, address, StringComparison.InvariantCultureIgnoreCase))
+                .Where(x => string.Equals(_addressNormalizer.NormalizeOrDefault(x.To, _ethereum.CryptoCurrency), address, StringComparison.InvariantCultureIgnoreCase))
                 .Select(x => new Transaction
                 (
                     _ethereum.CryptoCurrency,
