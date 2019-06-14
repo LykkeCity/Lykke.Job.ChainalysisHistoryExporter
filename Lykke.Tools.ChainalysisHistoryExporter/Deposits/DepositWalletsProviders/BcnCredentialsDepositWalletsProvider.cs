@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.Common;
@@ -57,24 +58,41 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositWalletsProvider
             var response = await _table.ExecuteQuerySegmentedAsync(query, continuationToken);
 
             var transactions = response.Results
-                .Select(wallet =>
+                .SelectMany(wallet =>
                 {
                     var assetReference = wallet.AssetId.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
                     var blockchain = _blockchainsProvider.GuessBlockchainOrDefault(assetReference);
 
                     if (blockchain == null)
                     {
-                        return null;
+                        return Enumerable.Empty<DepositWallet>();
                     }
 
-                    return new DepositWallet
-                    (
-                        Guid.Parse(wallet.ClientId),
-                        wallet.Address,
-                        blockchain.CryptoCurrency
-                    );
+                    var clientId = Guid.Parse(wallet.ClientId);
+                    var wallets = new List<DepositWallet>();
+
+                    if (!string.IsNullOrWhiteSpace(wallet.Address))
+                    {
+                        wallets.Add(new DepositWallet
+                        (
+                            clientId,
+                            wallet.Address,
+                            blockchain.CryptoCurrency
+                        ));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(wallet.AssetAddress))
+                    {
+                        wallets.Add(new DepositWallet
+                        (
+                            clientId,
+                            wallet.AssetAddress,
+                            blockchain.CryptoCurrency
+                        ));
+                    }
+
+                    return wallets;
                 })
-                .Where(x => x != null)
                 .ToArray();
 
             return PaginatedList.From(response.ContinuationToken, transactions);
