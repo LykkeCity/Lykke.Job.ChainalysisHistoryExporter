@@ -159,6 +159,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
         private DepositWallet NormalizeWalletOrDefault(DepositWallet wallet)
         {
+            if (string.IsNullOrWhiteSpace(wallet.Address) ||
+                string.IsNullOrWhiteSpace(wallet.CryptoCurrency) ||
+                wallet.UserId == Guid.Empty)
+            {
+                return null;
+            }
+
             var address = _addressNormalizer.NormalizeOrDefault(wallet.Address, wallet.CryptoCurrency);
             if (address == null)
             {
@@ -196,7 +203,13 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
                         foreach (var tx in transactions.Items)
                         {
-                            _transactionsReport.AddTransaction(tx);
+                            var normalizedTransaction = NormalizeTransactionOrDefault(tx);
+                            if (normalizedTransaction == null)
+                            {
+                                continue;
+                            }
+
+                            _transactionsReport.AddTransaction(normalizedTransaction);
 
                             Interlocked.Increment(ref _exportedDepositsCount);
                             ++processedWalletTransactionsCount;
@@ -226,6 +239,25 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
                 _concurrencySemaphore.Release();
             }
+        }
+
+        private Transaction NormalizeTransactionOrDefault(Transaction tx)
+        {
+            if (string.IsNullOrWhiteSpace(tx.Hash) ||
+                string.IsNullOrWhiteSpace(tx.CryptoCurrency) ||
+                tx.UserId == Guid.Empty)
+            {
+                return null;
+            }
+
+            var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency);
+            if (outputAddress == null)
+            {
+                _logger.LogWarning($"Address {tx.OutputAddress} is not valid for {tx.CryptoCurrency}, skipping");
+                return null;
+            }
+
+            return new Transaction(tx.CryptoCurrency, tx.Hash, tx.UserId, outputAddress, tx.Type);
         }
     }
 }
