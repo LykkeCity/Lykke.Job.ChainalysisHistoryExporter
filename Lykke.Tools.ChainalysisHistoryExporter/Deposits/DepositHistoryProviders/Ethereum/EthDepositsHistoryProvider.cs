@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.AddressNormalization;
@@ -6,24 +7,11 @@ using Lykke.Tools.ChainalysisHistoryExporter.Common;
 using Lykke.Tools.ChainalysisHistoryExporter.Configuration;
 using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
 {
     public class EthDepositsHistoryProvider : IDepositsHistoryProvider
     {
-        private enum ContinuationStage
-        {
-            Transactions,
-            InternalTransactions
-        }
-
-        private class ContinuationToken
-        {
-            public ContinuationStage Stage { get; set; }
-            public string InnerContinuation { get; set; }
-        }
-
         private readonly SamuraiClient _samuraiClient;
         private readonly Blockchain _ethereum;
         private readonly AddressNormalizer _addressNormalizer;
@@ -50,89 +38,75 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits.DepositHistoryProvider
                 return PaginatedList.From(Array.Empty<Transaction>());
             }
 
-            var continuationToken = continuation != null
-                ? JsonConvert.DeserializeObject<ContinuationToken>(continuation)
-                : new ContinuationToken {Stage = ContinuationStage.Transactions};
-
-            if (continuationToken.Stage == ContinuationStage.Transactions)
+            if (continuation != null)
             {
-                var result = await ReadTransactionsAsync(depositWallet, continuationToken.InnerContinuation);
-
-                if (result.Continuation == null)
-                {
-                    return PaginatedList.From(new ContinuationToken {Stage = ContinuationStage.InternalTransactions}, result.Items);
-                }
-
-                return PaginatedList.From
-                (
-                    new ContinuationToken
-                    {
-                        Stage = ContinuationStage.Transactions, 
-                        InnerContinuation = result.Continuation
-                    },
-                    result.Items
-                );
+                throw new NotSupportedException("Continuation is not supported");
             }
 
-            if (continuationToken.Stage == ContinuationStage.InternalTransactions)
-            {
-                var result = await ReadInternalTransactionsAsync(depositWallet, continuationToken.InnerContinuation);
-
-                if (result.Continuation == null)
-                {
-                    return PaginatedList.From(result.Items);
-                }
-
-                return PaginatedList.From
-                (
-                    new ContinuationToken
-                    {
-                        Stage = ContinuationStage.InternalTransactions, 
-                        InnerContinuation = result.Continuation
-                    },
-                    result.Items
-                );
-            }
-
-            throw new InvalidOperationException($"Unknown continuation stage: {continuationToken.Stage}");
-        }
-
-        private async Task<PaginatedList<Transaction>> ReadTransactionsAsync(DepositWallet depositWallet, string continuation)
-        {
-            var address = depositWallet.Address;
-            var operations = await _samuraiClient.GetOperationsHistoryAsync(depositWallet.Address, continuation);
-            var transactions = operations.Items
-                .Where(x => string.Equals(x.To, address, StringComparison.InvariantCultureIgnoreCase))
+            var operations = await ReadTransactionsAsync(depositWallet);
+            var internalOperations = await ReadInternalTransactionsAsync(depositWallet);
+            var internalOperationHashes = internalOperations.Select(x => x.TransactionHash).ToHashSet();
+            var transactions = operations
+                .Where(x => !internalOperationHashes.Contains(x.TransactionHash) && IsDeposit(depositWallet.Address, x.To))
                 .Select(x => new Transaction
                 (
                     _ethereum.CryptoCurrency,
-                    x.TransactionHash,
+                    x.TransactionHash.ToLower(),
                     depositWallet.UserId,
                     depositWallet.Address,
                     TransactionType.Deposit
-                ))
-                .ToArray();
-
-            return PaginatedList.From(operations.Continuation, transactions);
-        }
-
-        private async Task<PaginatedList<Transaction>> ReadInternalTransactionsAsync(DepositWallet depositWallet, string continuation)
-        {
-            var address = depositWallet.Address;
-            var operations = await _samuraiClient.GetErc20OperationsHistory(depositWallet.Address, continuation);
-            var transactions = operations.Items
-                .Where(x => string.Equals(_addressNormalizer.NormalizeOrDefault(x.To, _ethereum.CryptoCurrency), address, StringComparison.InvariantCultureIgnoreCase))
+                ));
+            var internalTransactions = internalOperations
+                .Where(x => IsDeposit(depositWallet.Address, x.To))
                 .Select(x => new Transaction
                 (
                     _ethereum.CryptoCurrency,
-                    x.TransactionHash,
+                    x.TransactionHash.ToLower(),
                     depositWallet.UserId,
                     depositWallet.Address,
                     TransactionType.Deposit
-                ))
-                .ToArray();
+                ));
+            var allTransactions = transactions.Concat(internalTransactions).ToArray();
 
-            return PaginatedList.From(operations.Continuation, transactions);
+            return PaginatedList.From(allTransactions);
+        }
+
+        private bool IsDeposit(string depositWalletAddress, string operationToAddress)
+        {
+            return string.Equals
+            (
+                _addressNormalizer.NormalizeOrDefault(operationToAddress, _ethereum.CryptoCurrency),
+                depositWalletAddress,
+                StringComparison.InvariantCultureIgnoreCase
+            );
+        }
+
+        private async Task<IReadOnlyCollection<SamuraiOperation>> ReadTransactionsAsync(DepositWallet depositWallet)
+        {
+            var operations = default(PaginatedList<SamuraiOperation>);
+            var allOperations = new List<SamuraiOperation>();
+
+            do
+            {
+                operations = await _samuraiClient.GetOperationsHistoryAsync(depositWallet.Address, operations?.Continuation);
+                allOperations.AddRange(operations.Items);
+            } while (operations.Continuation != null);
+
+            return allOperations;
+        }
+
+        private async Task<IReadOnlyCollection<SamuraiErc20Operation>> ReadInternalTransactionsAsync(DepositWallet depositWallet)
+        {
+            var operations = default(PaginatedList<SamuraiErc20Operation>);
+            var allOperations = new List<SamuraiErc20Operation>();
+
+            do
+            {
+                operations = await _samuraiClient.GetErc20OperationsHistory(depositWallet.Address, operations?.Continuation);
+                allOperations.AddRange(operations.Items);
+            } while (operations.Continuation != null);
+
+            return allOperations;
         }
     }
 }

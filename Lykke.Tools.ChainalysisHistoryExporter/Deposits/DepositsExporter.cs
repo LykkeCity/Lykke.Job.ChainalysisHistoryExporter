@@ -120,7 +120,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                             continue;
                         }
 
-                        allWalletsOfProvider.Add(wallet);
+                        allWalletsOfProvider.Add(normalizedWallet);
 
                         var currentLoadedDepositWalletsCount = Interlocked.Increment(ref loadedDepositWalletsCount);
 
