@@ -10,18 +10,18 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 {
     public class Exporter
     {
-        private readonly TransactionsReport _transactionsReport;
+        private readonly TransactionsReportBuilder _transactionsReportBuilder;
         private readonly ILogger<Exporter> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly DepositsExporter _depositsExporter;
 
         public Exporter(
-            TransactionsReport transactionsReport,
+            TransactionsReportBuilder transactionsReportBuilder,
             ILogger<Exporter> logger,
             IServiceProvider serviceProvider, 
             DepositsExporter depositsExporter)
         {
-            _transactionsReport = transactionsReport;
+            _transactionsReportBuilder = transactionsReportBuilder;
             _logger = logger;
             _serviceProvider = serviceProvider;
             _depositsExporter = depositsExporter;
@@ -30,7 +30,9 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
         public async Task ExportAsync()
         {
             _logger.LogInformation("Exporting...");
-            
+
+            await _transactionsReportBuilder.LoadSnapshotAsync();
+
             {
                 // Localizes lifetime of the withdrawals exported to free up consumed memory when it finished.
                 var withdrawalsExporter = _serviceProvider.GetRequiredService<WithdrawalsExporter>();
@@ -43,9 +45,10 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Common
 
             await _depositsExporter.ExportAsync();
 
-            await _transactionsReport.SaveAsync();
+            await _transactionsReportBuilder.SaveIncrementAsync();
+            await _transactionsReportBuilder.SaveSnapshotAsync();
 
-            _logger.LogInformation($"Exporting done.");
+            _logger.LogInformation("Exporting done.");
         }
     }
 }

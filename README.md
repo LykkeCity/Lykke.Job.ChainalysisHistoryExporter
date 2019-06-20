@@ -39,8 +39,9 @@ Add and configure ```appsettings.json``` to the /Lykke.Tools.ChainalysisHistoryE
     ]
   },
   "Report": {
-    "TransactionsFilePath": "transactions.csv",
-    "DepositWalletsFilePath": "deposit-wallets.csv" 
+    "TransactionsFilePath": "transactions-{date}.csv",
+    "DepositWalletsFilePath": "deposit-wallets.csv",
+    "AzureStorageConnString": "<ChainalysisExporterAzureStorageConnString>"
   },
   "Services": {
     "Assets": "<AssetsServiceUrl>"

@@ -16,7 +16,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
     public class DepositsExporter : IDisposable
     {
         private readonly ILogger<DepositsExporter> _logger;
-        private readonly TransactionsReport _transactionsReport;
+        private readonly TransactionsReportBuilder _transactionsReportBuilder;
         private readonly DepositWalletsReport _depositWalletsReport;
         private readonly AddressNormalizer _addressNormalizer;
         private readonly IReadOnlyCollection<IDepositWalletsProvider> _depositWalletsProviders;
@@ -28,7 +28,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
 
         public DepositsExporter(
             ILogger<DepositsExporter> logger,
-            TransactionsReport transactionsReport,
+            TransactionsReportBuilder transactionsReportBuilder,
             DepositWalletsReport depositWalletsReport,
             AddressNormalizer addressNormalizer,
             IEnumerable<IDepositWalletsProvider> depositWalletsProviders,
@@ -37,7 +37,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
             IOptions<DepositHistoryProvidersSettings> depositHistoryProvidersSettings)
         {
             _logger = logger;
-            _transactionsReport = transactionsReport;
+            _transactionsReportBuilder = transactionsReportBuilder;
             _depositWalletsReport = depositWalletsReport;
             _addressNormalizer = addressNormalizer;
             _depositWalletsProviders = depositWalletsProviders
@@ -209,7 +209,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Deposits
                                 continue;
                             }
 
-                            _transactionsReport.AddTransaction(normalizedTransaction);
+                            _transactionsReportBuilder.AddTransaction(normalizedTransaction);
 
                             Interlocked.Increment(ref _exportedDepositsCount);
                             ++processedWalletTransactionsCount;

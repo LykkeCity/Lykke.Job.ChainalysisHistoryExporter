@@ -36,7 +36,11 @@ namespace Lykke.Tools.ChainalysisHistoryExporter
 
             var services = new ServiceCollection();
 
-            services.AddSingleton<TransactionsReport>();
+            services.AddSingleton<TransactionsReportBuilder>();
+            services.AddTransient<TransactionsReportReader>();
+            services.AddTransient<TransactionsReportWriter>();
+            services.AddTransient<TransactionsIncrementRepository>();
+            services.AddTransient<TransactionsSnapshotRepository>();
             services.AddTransient<DepositWalletsReport>();
             services.AddTransient<Exporter>();
             services.AddSingleton<BlockchainsProvider>();
