@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Lykke.Tools.ChainalysisHistoryExporter.AddressNormalization;
@@ -10,7 +11,6 @@ using Lykke.Tools.ChainalysisHistoryExporter.Reporting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NBitcoin.Altcoins;
-using Transaction = Lykke.Tools.ChainalysisHistoryExporter.Reporting.Transaction;
 
 namespace InvalidAddressRemover
 {
@@ -56,60 +56,66 @@ namespace InvalidAddressRemover
                     new EthAddressNormalizer(blockchainProvider),
                 }
             );
-            var report = new TransactionsReport
+            var reportReader = new TransactionsReportReader(addressNormalizer);
+            var reportWriter = new TransactionsReportWriter();
+
+            Console.WriteLine("Loading...");
+
+            var readStream = File.Open("transactions.csv", FileMode.Open, FileAccess.Read, FileShare.Read);
+            var originalTransactions = await reportReader.ReadAsync
             (
-                new Logger<TransactionsReport>(),
-                Options.Create(new ReportSettings {TransactionsFilePath = "filtered-transactions.csv"})
+                readStream,
+                new Progress<int>
+                (
+                    transactionCount =>
+                    {
+                        if (transactionCount % 1000 == 0)
+                        {
+                            Console.WriteLine(transactionCount);
+                        }
+                    }
+                ),
+                leaveOpen: false
             );
 
-            int readLinesCount = 0;
+            Console.WriteLine("Filtering...");
 
-            var stream = File.Open("transactions.csv", FileMode.Open, FileAccess.Read, FileShare.Read);
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            {
-                await reader.ReadLineAsync();
+            var filteredTransactions = originalTransactions
+                .Where
+                (
+                    tx => !string.IsNullOrWhiteSpace(tx.Hash) &&
+                          !string.IsNullOrWhiteSpace(tx.CryptoCurrency) &&
+                          tx.UserId != Guid.Empty
+                )
+                .ToHashSet();
 
-                while (!reader.EndOfStream)
-                {
-                    var line = await reader.ReadLineAsync();
-                    var parts = line.Split(",");
+            Console.WriteLine("Saving...");
 
-                    if (parts.Length != 5)
+            var writeStream = File.Open
+            (
+                "filtered-transactions.csv",
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.Read
+            );
+            await reportWriter.WriteAsync
+            (
+                filteredTransactions,
+                writeStream,
+                new Progress<int>
+                (
+                    transactionsCount =>
                     {
-                        continue;
+                        if (transactionsCount % 1000 == 0)
+                        {
+                            var percent = transactionsCount * 100 / filteredTransactions.Count;
+
+                            Console.WriteLine($"{percent}%");
+                        }
                     }
-
-                    if (!Guid.TryParse(parts[0], out var userId))
-                    {
-                        Console.WriteLine($"User ID {parts[0]} is invalid GUID. Skipping");
-                        continue;
-                    }
-
-                    var cryptoCurrency = parts[1];
-                    var transactionType = parts[2] == "sent" ? TransactionType.Withdrawal : TransactionType.Deposit;
-                    var transactionHash = parts[3];
-                    var outputAddress = addressNormalizer.NormalizeOrDefault(parts[4], cryptoCurrency);
-
-                    if (outputAddress == null)
-                    {
-                        Console.WriteLine($"Address {parts[4]} is invalid for {cryptoCurrency}. Skipping");
-                        continue;
-                    }
-
-                    var transaction = new Transaction(cryptoCurrency, transactionHash, userId, outputAddress, transactionType);
-
-                    report.AddTransaction(transaction);
-
-                    ++readLinesCount;
-
-                    if (readLinesCount % 1000 == 0)
-                    {
-                        Console.WriteLine(readLinesCount);
-                    }
-                }
-            }
-
-            await report.SaveAsync();
+                ),
+                leaveOpen: false
+            );
         }
     }
 }

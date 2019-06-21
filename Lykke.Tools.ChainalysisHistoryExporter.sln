@@ -13,7 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvalidAddressRemover", "InvalidAddressRemover\InvalidAddressRemover.csproj", "{C330EE19-540A-4000-8B05-A3D9C88D7AE0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{788F5F2B-A498-413A-864E-B0A09BAE3EE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{788F5F2B-A498-413A-864E-B0A09BAE3EE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportSnapshotUploader", "ReportSnapshotUploader\ReportSnapshotUploader.csproj", "{7DCE39DE-13A6-4B80-A15E-194FCC6E4E58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{788F5F2B-A498-413A-864E-B0A09BAE3EE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{788F5F2B-A498-413A-864E-B0A09BAE3EE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{788F5F2B-A498-413A-864E-B0A09BAE3EE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DCE39DE-13A6-4B80-A15E-194FCC6E4E58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DCE39DE-13A6-4B80-A15E-194FCC6E4E58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DCE39DE-13A6-4B80-A15E-194FCC6E4E58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DCE39DE-13A6-4B80-A15E-194FCC6E4E58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,20 +17,20 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
     public class WithdrawalsExporter
     {
         private readonly ILogger<WithdrawalsExporter> _logger;
-        private readonly TransactionsReport _transactionsReport;
+        private readonly TransactionsReportBuilder _transactionsReportBuilder;
         private readonly AddressNormalizer _addressNormalizer;
         private readonly IReadOnlyCollection<IWithdrawalsHistoryProvider> _withdrawalsHistoryProviders;
         private int _exportedWithdrawalsCount;
 
         public WithdrawalsExporter(
             ILogger<WithdrawalsExporter> logger,
-            TransactionsReport transactionsReport,
+            TransactionsReportBuilder transactionsReportBuilder,
             IEnumerable<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders,
             IOptions<WithdrawalHistoryProvidersSettings> withdrawalsHistoryProvidersSettings,
             AddressNormalizer addressNormalizer)
         {
             _logger = logger;
-            _transactionsReport = transactionsReport;
+            _transactionsReportBuilder = transactionsReportBuilder;
             _addressNormalizer = addressNormalizer;
             _withdrawalsHistoryProviders = withdrawalsHistoryProviders
                 .Where(x => withdrawalsHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
@@ -78,7 +78,7 @@ namespace Lykke.Tools.ChainalysisHistoryExporter.Withdrawals
                         continue;
                     }
 
-                    _transactionsReport.AddTransaction(normalizedTransaction);
+                    _transactionsReportBuilder.AddTransaction(normalizedTransaction);
 
                     var exportedWithdrawalsCount = Interlocked.Increment(ref _exportedWithdrawalsCount);
 
