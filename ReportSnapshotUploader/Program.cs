@@ -37,7 +37,7 @@ namespace ReportSnapshotUploader
             var container = blobClient.GetContainerReference("chainalysis-history-exporter");
 
             await container.CreateIfNotExistsAsync();
-            var blob = container.GetBlockBlobReference("full-report");
+            var blob = container.GetBlockBlobReference("full-report.csv");
 
             Console.WriteLine($"Start uploading file: {filePath}...");
 
