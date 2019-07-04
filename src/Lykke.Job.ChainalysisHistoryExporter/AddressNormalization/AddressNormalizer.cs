@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
+using Lykke.Common.Log;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
 {
@@ -9,12 +9,17 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
         private readonly IReadOnlyCollection<IAddressNormalizer> _normalizers;
 
         public AddressNormalizer(
-            ILogger<AddressNormalizer> logger,
+            ILogFactory logFactory,
             IEnumerable<IAddressNormalizer> normalizers)
         {
             _normalizers = normalizers.ToArray();
 
-            logger.LogInformation($"Address normalizers: {string.Join(", ", _normalizers.Select(x => x.GetType().Name))}");
+            var log = logFactory.CreateLog(this);
+
+            log.Info("Address normalizer created", new
+            {
+                AddressNormalizers = _normalizers.Select(x => x.GetType().Name)
+            });
         }
 
         public string NormalizeOrDefault(string address, string cryptoCurrency)

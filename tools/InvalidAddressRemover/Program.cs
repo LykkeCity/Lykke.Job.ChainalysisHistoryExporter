@@ -3,51 +3,40 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Assets;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Logging;
+using Lykke.Logs;
+using Lykke.Logs.Loggers.LykkeConsole;
 using Microsoft.Extensions.Options;
 using NBitcoin.Altcoins;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
 
 namespace InvalidAddressRemover
 {
-    public class Logger<T> : ILogger<T>, IDisposable
-    {
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
-
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return new Logger<T>();
-        }
-
-        public void Dispose()
-        {
-        }
-    }
-
     class Program
     {
         static async Task Main(string[] args)
         {
             Litecoin.Instance.EnsureRegistered();
             BCash.Instance.EnsureRegistered();
-            
-            var assetsClient = new AssetsClient(new Logger<AssetsClient>(), Options.Create(new ServicesSettings()));
+
+            using (var logFactory = LogFactory.Create().AddConsole())
+            {
+                await RemoveInvalidAddresses(logFactory);
+            }
+        }
+
+        private static async Task RemoveInvalidAddresses(ILogFactory logFactory)
+        {
+            var assetsClient = new AssetsClient(logFactory, Options.Create(new ServicesSettings()));
             var blockchainProvider = new BlockchainsProvider(assetsClient);
             var addressNormalizer = new AddressNormalizer
             (
-                new Logger<AddressNormalizer>(),
+                logFactory,
                 new IAddressNormalizer[]
                 {
                     new GeneralAddressNormalizer(),

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
@@ -16,21 +17,19 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
 {
     public class WithdrawalsExporter
     {
-        private readonly ILogger<WithdrawalsExporter> _logger;
-        private readonly TransactionsReportBuilder _transactionsReportBuilder;
+        private readonly ILog _log;
         private readonly AddressNormalizer _addressNormalizer;
         private readonly IReadOnlyCollection<IWithdrawalsHistoryProvider> _withdrawalsHistoryProviders;
         private int _exportedWithdrawalsCount;
+        
 
         public WithdrawalsExporter(
-            ILogger<WithdrawalsExporter> logger,
-            TransactionsReportBuilder transactionsReportBuilder,
+            ILogFactory logFactory,
             IEnumerable<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders,
             IOptions<WithdrawalHistoryProvidersSettings> withdrawalsHistoryProvidersSettings,
             AddressNormalizer addressNormalizer)
         {
-            _logger = logger;
-            _transactionsReportBuilder = transactionsReportBuilder;
+            _log = logFactory.CreateLog(this);
             _addressNormalizer = addressNormalizer;
             _withdrawalsHistoryProviders = withdrawalsHistoryProviders
                 .Where(x => withdrawalsHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
@@ -39,8 +38,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
 
         public async Task ExportAsync()
         {
-            _logger.LogInformation("Exporting withdrawals...");
-            _logger.LogInformation($"Withdrawals history providers: {string.Join(", ", _withdrawalsHistoryProviders.Select(x => x.GetType().Name))}");
+            _log.Info("Exporting withdrawals...", new
+            {
+                WithdrawalHistoryProviders = _withdrawalsHistoryProviders.Select(x => x.GetType().Name)
+            });
 
             var tasks = new List<Task>();
 
@@ -51,7 +52,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
 
             await Task.WhenAll(tasks);
 
-            _logger.LogInformation($"Withdrawals exporting done. {_exportedWithdrawalsCount} withdrawals exported");
+            _log.Info($"Withdrawals exporting done. {_exportedWithdrawalsCount} withdrawals exported");
         }
 
         private async Task ExportProviderWithdrawals(IWithdrawalsHistoryProvider historyProvider)
@@ -63,8 +64,15 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
                 transactions = await Policy
                     .Handle<Exception>(ex =>
                     {
-                        _logger.LogWarning(ex,
-                            $"Failed to get withdrawals history using {historyProvider.GetType().Name}. Operation will be retried.");
+                        _log.Warning
+                        (
+                            "Failed to get withdrawals history. Operation will be retried.",
+                            context: new
+                            {
+                                WithdrawalHistoryProvider = historyProvider.GetType().Name
+                            },
+                            exception: ex
+                        );
                         return true;
                     })
                     .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
@@ -84,7 +92,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
 
                     if (exportedWithdrawalsCount % 1000 == 0)
                     {
-                        _logger.LogInformation($"{exportedWithdrawalsCount} withdrawals exported so far");
+                        _log.Info($"{exportedWithdrawalsCount} withdrawals exported so far");
                     }
                 }
             } while (transactions.Continuation != null);
@@ -102,7 +110,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
             var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency);
             if (outputAddress == null)
             {
-                _logger.LogWarning($"Address {tx.OutputAddress} is not valid for {tx.CryptoCurrency}, skipping");
+                _log.Warning("It is not a valid address, skipping", context: new
+                {
+                    Address = tx.OutputAddress,
+                    CryptoCurrencty = tx.CryptoCurrency
+                });
                 return null;
             }
 

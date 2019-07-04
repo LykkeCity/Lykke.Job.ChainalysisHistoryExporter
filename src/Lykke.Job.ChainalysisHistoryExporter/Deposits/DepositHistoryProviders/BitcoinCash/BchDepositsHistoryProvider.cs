@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Common.Log;
 using Flurl.Http;
+using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.InsightApi;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
@@ -23,18 +24,18 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.
             public int Page { get; set; }
         }
 
-        private readonly ILogger<BchDepositsHistoryProvider> _logger;
+        private readonly ILog _log;
         private readonly AddressNormalizer _addressNormalizer;
         private readonly InsightApiClient _insightApi;
         private readonly Blockchain _bitcoinCash;
-
+        
         public BchDepositsHistoryProvider(
-            ILogger<BchDepositsHistoryProvider> logger,
+            ILogFactory logFactory,
             IOptions<BchSettings> settings,
             BlockchainsProvider blockchainsProvider,
             AddressNormalizer addressNormalizer)
         {
-            _logger = logger;
+            _log = logFactory.CreateLog(this);
             _addressNormalizer = addressNormalizer;
             _insightApi = new InsightApiClient(settings.Value.InsightApiUrl);
             _bitcoinCash = blockchainsProvider.GetBitcoinCash();
@@ -72,7 +73,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.
 
                 if (responseMessage == "Invalid address. Code:-5")
                 {
-                    _logger.LogWarning($"Insight API treated address [{depositWallet.Address}] as invalid. Skipping");
+                    _log.Warning
+                    (
+                        "Insight API treated address as invalid. Skipping",
+                        context: new
+                        {
+                            Address = depositWallet.Address
+                        }
+                    );
                 }
                 else
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Assets;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
@@ -11,6 +12,8 @@ using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitc
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.LiteCoin;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
+using Lykke.Logs;
+using Lykke.Logs.Loggers.LykkeConsole;
 using Microsoft.Extensions.Options;
 using NBitcoin.Altcoins;
 using NUnit.Framework;
@@ -21,18 +24,20 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
     {
         private AddressNormalizer _addressNormalizer;
         private BlockchainsProvider _blockchainProvider;
+        private ILogFactory _logFactory;
 
         [SetUp]
         public void Setup()
         {
             BCash.Instance.EnsureRegistered();
             Litecoin.Instance.EnsureRegistered();
-            
-            var assetsClient = new AssetsClient(new DummyLogger<AssetsClient>(), Options.Create(new ServicesSettings()));
+
+            _logFactory = LogFactory.Create().AddUnbufferedConsole();
+            var assetsClient = new AssetsClient(_logFactory, Options.Create(new ServicesSettings()));
             _blockchainProvider = new BlockchainsProvider(assetsClient);
             _addressNormalizer = new AddressNormalizer
             (
-                new DummyLogger<AddressNormalizer>(),
+                _logFactory,
                 new IAddressNormalizer[]
                 {
                     new GeneralAddressNormalizer(),
@@ -42,6 +47,12 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                     new EthAddressNormalizer(_blockchainProvider),
                 }
             );
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            _logFactory?.Dispose();
         }
 
         [Test]
@@ -116,7 +127,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
 
             var historyProvider = new LtcDepositsHistoryProvider
             (
-                new DummyLogger<LtcDepositsHistoryProvider>(),
+                _logFactory,
                 Options.Create(new LtcSettings
                 {
                     Network = "ltc-main", 
@@ -177,7 +188,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
 
             var historyProvider = new BchDepositsHistoryProvider
             (
-                new DummyLogger<BchDepositsHistoryProvider>(),
+                _logFactory,
                 Options.Create(new BchSettings
                 {
                     Network = "main", 

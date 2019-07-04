@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -64,18 +65,19 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
 
         #endregion
 
-        private readonly ILogger<BilCashoutsBatchWithdrawalsHistoryProvider> _logger;
+        private readonly ILog _log;
         private readonly BlockchainsProvider _blockchainsProvider;
         private readonly CloudTable _cashoutBatchesTable;
         private readonly CloudTable _operationExecutionsTable;
         private IReadOnlyDictionary<Guid, OperationExecutionEntity> _operationExecutions;
+        
 
         public BilCashoutsBatchWithdrawalsHistoryProvider(
-            ILogger<BilCashoutsBatchWithdrawalsHistoryProvider> logger,
+            ILogFactory logFactory,
             BlockchainsProvider blockchainsProvider,
             IOptions<AzureStorageSettings> azureStorageSettings)
         {
-            _logger = logger;
+            _log = logFactory.CreateLog(this);
             _blockchainsProvider = blockchainsProvider;
 
             var cashoutProcessorAzureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.CashoutProcessorConnString);
@@ -114,7 +116,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
 
                     if (!operationExecutions.TryGetValue(cashoutsBatch.BatchId, out var operationExecution))
                     {
-                        _logger.LogWarning($"Operation execution for cashouts batch {cashoutsBatch.BatchId} not found, skipping");
+                        _log.Warning($"Operation execution for cashouts batch {cashoutsBatch.BatchId} not found, skipping");
 
                         return Enumerable.Empty<Transaction>();
                     }
@@ -127,7 +129,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
 
                     if (string.IsNullOrWhiteSpace(operationExecution.TransactionHash))
                     {
-                        _logger.LogWarning($"Transaction hash for cashouts batch {cashoutsBatch.BatchId} is empty, skipping");
+                        _log.Warning($"Transaction hash for cashouts batch {cashoutsBatch.BatchId} is empty, skipping");
 
                         return Enumerable.Empty<Transaction>();
                     }
@@ -155,7 +157,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
                 return _operationExecutions;
             }
 
-            _logger.LogInformation("Loading operation executions...");
+            _log.Info("Loading operation executions...");
 
             var query = new TableQuery<OperationExecutionEntity>
             {
@@ -172,13 +174,13 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
 
                 result.AddRange(response.Results);
 
-                _logger.LogInformation($"{result.Count / 1000 * 1000} operation executions loaded so far");
+                _log.Info($"{result.Count / 1000 * 1000} operation executions loaded so far");
 
             } while (continuationToken != null);
 
             _operationExecutions = result.ToDictionary(x => x.OperationId);
 
-            _logger.LogInformation($"Operation executions loading done. {_operationExecutions.Count} operation executions loaded");
+            _log.Info($"Operation executions loading done. {_operationExecutions.Count} operation executions loaded");
 
             return _operationExecutions;
         }

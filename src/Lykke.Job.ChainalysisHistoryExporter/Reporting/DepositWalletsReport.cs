@@ -2,23 +2,24 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 {
     public class DepositWalletsReport
     {
-        private readonly ILogger<DepositWalletsReport> _logger;
         private readonly IOptions<ReportSettings> _reportSettings;
+        private readonly ILog _log;
 
         public DepositWalletsReport(
-            ILogger<DepositWalletsReport> logger,
+            ILogFactory logFactory,
             IOptions<ReportSettings> reportSettings)
         {
-            _logger = logger;
+            _log = logFactory.CreateLog(this);
             _reportSettings = reportSettings;
         }
 
@@ -26,7 +27,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
         {
             var filePath = _reportSettings.Value.DepositWalletsFilePath;
 
-            _logger.LogInformation($"Saving deposit wallets. report to {filePath}..");
+            _log.Info($"Saving deposit wallets. report to {filePath}..");
 
             var stream = File.Open(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             
@@ -38,7 +39,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
                 }
             }
 
-            _logger.LogInformation($"Deposit wallets saving done. {depositWallets.Count} deposit wallets saved");
+            _log.Info($"Deposit wallets saving done. {depositWallets.Count} deposit wallets saved");
         }
     }
 }

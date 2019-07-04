@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
 
@@ -15,8 +16,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
 {
     public class DepositsExporter : IDisposable
     {
-        private readonly ILogger<DepositsExporter> _logger;
-        private readonly TransactionsReportBuilder _transactionsReportBuilder;
+        private readonly ILog _log;
         private readonly DepositWalletsReport _depositWalletsReport;
         private readonly AddressNormalizer _addressNormalizer;
         private readonly IReadOnlyCollection<IDepositWalletsProvider> _depositWalletsProviders;
@@ -25,10 +25,9 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
         private int _processedWalletsCount;
         private int _exportedDepositsCount;
         private int _totalDepositWalletsCount;
-
+        
         public DepositsExporter(
-            ILogger<DepositsExporter> logger,
-            TransactionsReportBuilder transactionsReportBuilder,
+            ILogFactory logFactory,
             DepositWalletsReport depositWalletsReport,
             AddressNormalizer addressNormalizer,
             IEnumerable<IDepositWalletsProvider> depositWalletsProviders,
@@ -36,8 +35,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             IOptions<DepositWalletProvidersSettings> depositWalletsProvidersSettings,
             IOptions<DepositHistoryProvidersSettings> depositHistoryProvidersSettings)
         {
-            _logger = logger;
-            _transactionsReportBuilder = transactionsReportBuilder;
+            _log = logFactory.CreateLog(this);
             _depositWalletsReport = depositWalletsReport;
             _addressNormalizer = addressNormalizer;
             _depositWalletsProviders = depositWalletsProviders
@@ -60,8 +58,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
 
             var tasks = new List<Task>(512);
 
-            _logger.LogInformation("Exporting deposits...");
-            _logger.LogInformation($"Deposits history providers: {string.Join(", ", _depositsHistoryProviders.Select(x => x.GetType().Name))}");
+            _log.Info("Exporting deposits...", new
+            {
+                DepositsHistoryProvider = _depositsHistoryProviders.Select(x => x.GetType().Name)
+            });
 
             foreach (var wallet in depositWallets)
             {
@@ -78,7 +78,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
 
             await Task.WhenAll(tasks);
 
-            _logger.LogInformation($"Deposits exporting done. {_processedWalletsCount} deposit wallets processed. {_exportedDepositsCount} deposits exported");
+            _log.Info($"Deposits exporting done. {_processedWalletsCount} deposit wallets processed. {_exportedDepositsCount} deposits exported");
         }
 
         public void Dispose()
@@ -88,8 +88,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
 
         private async Task<ISet<DepositWallet>> LoadDepositWalletsAsync()
         {
-            _logger.LogInformation("Loading deposit wallets...");
-            _logger.LogInformation($"Deposit wallets providers: {string.Join(", ", _depositWalletsProviders.Select(x => x.GetType().Name))}");
+            _log.Info("Loading deposit wallets...", new
+            {
+                DepositWalletsProviders = _depositWalletsProviders.Select(x => x.GetType().Name)
+            });
 
             var allWallets = new HashSet<DepositWallet>(131072); // 2 ^ 17
 
@@ -105,7 +107,8 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
                     wallets = await Policy
                         .Handle<Exception>(ex =>
                         {
-                            _logger.LogWarning(ex, $"Failed to get deposits wallets using {provider.GetType().Name}. Operation will be retried.");
+                            _log.Warning($"Failed to get deposits wallets using {provider.GetType().Name}. Operation will be retried.",
+                                ex);
                             return true;
                         })
                         .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
@@ -126,7 +129,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
 
                         if (currentLoadedDepositWalletsCount % 1000 == 0)
                         {
-                            _logger.LogInformation($"{currentLoadedDepositWalletsCount} deposit wallets loaded so far");
+                            _log.Info($"{currentLoadedDepositWalletsCount} deposit wallets loaded so far");
                         }
                     }
 
@@ -152,7 +155,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
                 }
             }
 
-            _logger.LogInformation($"Deposit wallets loading done. {allWallets.Count} unique deposit wallets loaded");
+            _log.Info($"Deposit wallets loading done. {allWallets.Count} unique deposit wallets loaded");
 
             return allWallets;
         }
@@ -169,7 +172,15 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             var address = _addressNormalizer.NormalizeOrDefault(wallet.Address, wallet.CryptoCurrency);
             if (address == null)
             {
-                _logger.LogWarning($"Address {wallet.Address} is not a valid address for {wallet.CryptoCurrency}, skipping");
+                _log.Warning
+                (
+                    "It is not a valid address, skipping",
+                    context: new
+                    {
+                        Address = wallet.Address, 
+                        CryptoCurrency = wallet.CryptoCurrency
+                    }
+                );
                 return null;
             }
 
@@ -195,7 +206,17 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
                         transactions = await Policy
                             .Handle<Exception>(ex =>
                             {
-                                _logger.LogWarning(ex, $"Failed to get deposits history of {wallet.CryptoCurrency}:{wallet.Address}  using {historyProvider.GetType().Name}. Operation will be retried.");
+                                _log.Warning
+                                (
+                                    "Failed to get deposits history. Operation will be retried.",
+                                    context: new
+                                    {
+                                        Address = wallet.Address,
+                                        CryptoCurrency = wallet.CryptoCurrency,
+                                        HistoryProvider = historyProvider.GetType().Name
+                                    },
+                                    exception: ex
+                                );
                                 return true;
                             })
                             .WaitAndRetryForeverAsync(i => TimeSpan.FromSeconds(Math.Min(i, 5)))
@@ -216,7 +237,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
 
                             if (processedWalletTransactionsCount % 100 == 0)
                             {
-                                _logger.LogInformation($"{processedWalletTransactionsCount} deposits processed so far of {wallet.CryptoCurrency}:{wallet.Address} wallet using {historyProvider.GetType().Name}");
+                                _log.Info($"{processedWalletTransactionsCount} deposits processed so far of {wallet.CryptoCurrency}:{wallet.Address} wallet using {historyProvider.GetType().Name}");
                             }
                         }
                         
@@ -234,7 +255,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
                 if (processedWalletsCount % 100 == 0)
                 {
                     var completedPercent = processedWalletsCount * 100 / _totalDepositWalletsCount;
-                    _logger.LogInformation($"{processedWalletsCount} wallets processed so far ({completedPercent}%). {_exportedDepositsCount} deposits exported so far.");
+                    _log.Info($"{processedWalletsCount} wallets processed so far ({completedPercent}%). {_exportedDepositsCount} deposits exported so far.");
                 }
 
                 _concurrencySemaphore.Release();
@@ -253,7 +274,15 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency);
             if (outputAddress == null)
             {
-                _logger.LogWarning($"Address {tx.OutputAddress} is not valid for {tx.CryptoCurrency}, skipping");
+                _log.Warning
+                (
+                    "It is not a valid address, skipping",
+                    context: new
+                    {
+                        Address = tx.OutputAddress, 
+                        CryptoCurrency = tx.CryptoCurrency
+                    }
+                );
                 return null;
             }
 
