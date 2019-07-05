@@ -7,8 +7,8 @@ using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Assets;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Lykke.Logs;
 using Lykke.Logs.Loggers.LykkeConsole;
 using Microsoft.Extensions.Options;
@@ -32,7 +32,7 @@ namespace InvalidAddressRemover
 
         private static async Task RemoveInvalidAddresses(ILogFactory logFactory)
         {
-            var assetsClient = new AssetsClient(logFactory, Options.Create(new ServicesSettings()));
+            var assetsClient = new AssetsClient(logFactory, new AssetsClientSettings());
             var blockchainProvider = new BlockchainsProvider(assetsClient);
             var addressNormalizer = new AddressNormalizer
             (
@@ -40,9 +40,9 @@ namespace InvalidAddressRemover
                 new IAddressNormalizer[]
                 {
                     new GeneralAddressNormalizer(),
-                    new BtcAddressNormalizer(blockchainProvider, Options.Create(new BtcSettings {Network = "mainnet"})),
-                    new BchAddressNormalizer(blockchainProvider, Options.Create(new BchSettings {Network = "mainnet"})),
-                    new LtcAddressNormalizer(blockchainProvider, Options.Create(new LtcSettings {Network = "ltc-main"})),
+                    new BtcAddressNormalizer(blockchainProvider, new BtcSettings {Network = "mainnet"}),
+                    new BchAddressNormalizer(blockchainProvider, new BchSettings {Network = "mainnet"}),
+                    new LtcAddressNormalizer(blockchainProvider, new LtcSettings {Network = "ltc-main"}),
                     new EthAddressNormalizer(blockchainProvider),
                 }
             );

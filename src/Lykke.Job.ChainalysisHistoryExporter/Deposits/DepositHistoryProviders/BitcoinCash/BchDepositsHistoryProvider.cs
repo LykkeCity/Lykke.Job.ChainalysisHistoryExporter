@@ -8,10 +8,9 @@ using Flurl.Http;
 using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.InsightApi;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Newtonsoft.Json;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
 
@@ -31,13 +30,13 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.
         
         public BchDepositsHistoryProvider(
             ILogFactory logFactory,
-            IOptions<BchSettings> settings,
+            BchSettings settings,
             BlockchainsProvider blockchainsProvider,
             AddressNormalizer addressNormalizer)
         {
             _log = logFactory.CreateLog(this);
             _addressNormalizer = addressNormalizer;
-            _insightApi = new InsightApiClient(settings.Value.InsightApiUrl);
+            _insightApi = new InsightApiClient(settings.InsightApiUrl);
             _bitcoinCash = blockchainsProvider.GetBitcoinCash();
         }
 

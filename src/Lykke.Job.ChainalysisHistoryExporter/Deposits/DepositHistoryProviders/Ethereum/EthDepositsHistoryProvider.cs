@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
 {
@@ -18,11 +17,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.
 
         public EthDepositsHistoryProvider(
             BlockchainsProvider blockchainsProvider,
-            IOptions<EthSettings> settings,
+            EthSettings settings,
             AddressNormalizer addressNormalizer)
         {
             _addressNormalizer = addressNormalizer;
-            _samuraiClient = new SamuraiClient(settings.Value.SamuraiUrl);
+            _samuraiClient = new SamuraiClient(settings.SamuraiUrl);
             _ethereum = blockchainsProvider.GetEthereum();
         }
 

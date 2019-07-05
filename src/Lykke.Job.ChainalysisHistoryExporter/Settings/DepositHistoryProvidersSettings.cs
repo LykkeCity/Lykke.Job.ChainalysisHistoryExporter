@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Configuration
+namespace Lykke.Job.ChainalysisHistoryExporter.Settings
 {
     public class DepositHistoryProvidersSettings
     {

@@ -26,7 +26,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter
                 options.Logs = logs =>
                 {
                     logs.AzureTableName = "ChainalysisHistoryExporterJobLog";
-                    logs.AzureTableConnectionStringResolver = settings => settings.ChainalysisHistoryExporterJob.Db.LogsConnString;
+                    logs.AzureTableConnectionStringResolver = settings => settings.AzureStorage.LogsConnString;
                 };
             });
         }

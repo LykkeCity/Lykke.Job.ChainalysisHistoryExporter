@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Configuration
+namespace Lykke.Job.ChainalysisHistoryExporter.Settings
 {
-    public class DepositWalletProvidersSettings
+    public class WithdrawalHistoryProvidersSettings
     {
         public IReadOnlyCollection<string> Providers { get; set; }
     }

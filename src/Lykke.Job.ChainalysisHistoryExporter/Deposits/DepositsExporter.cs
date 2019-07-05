@@ -7,9 +7,7 @@ using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Options;
 using Polly;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
@@ -30,20 +28,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             ILogFactory logFactory,
             DepositWalletsReport depositWalletsReport,
             AddressNormalizer addressNormalizer,
-            IEnumerable<IDepositWalletsProvider> depositWalletsProviders,
-            IEnumerable<IDepositsHistoryProvider> depositsHistoryProviders,
-            IOptions<DepositWalletProvidersSettings> depositWalletsProvidersSettings,
-            IOptions<DepositHistoryProvidersSettings> depositHistoryProvidersSettings)
+            IReadOnlyCollection<IDepositWalletsProvider> depositWalletsProviders,
+            IReadOnlyCollection<IDepositsHistoryProvider> depositsHistoryProviders)
         {
             _log = logFactory.CreateLog(this);
             _depositWalletsReport = depositWalletsReport;
             _addressNormalizer = addressNormalizer;
-            _depositWalletsProviders = depositWalletsProviders
-                .Where(x => depositWalletsProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
-                .ToArray();
-            _depositsHistoryProviders = depositsHistoryProviders
-                .Where(x => depositHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
-                .ToArray();
+            _depositWalletsProviders = depositWalletsProviders;
+            _depositsHistoryProviders = depositsHistoryProviders;
 
             _concurrencySemaphore = new SemaphoreSlim(8);
         }

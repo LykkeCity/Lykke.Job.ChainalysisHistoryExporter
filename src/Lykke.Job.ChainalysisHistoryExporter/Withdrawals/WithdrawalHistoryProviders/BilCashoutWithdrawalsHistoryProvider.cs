@@ -2,10 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProviders
@@ -47,11 +46,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
 
         public BilCashoutWithdrawalsHistoryProvider(
             BlockchainsProvider blockchainsProvider,
-            IOptions<AzureStorageSettings> azureStorageSettings)
+            AzureStorageSettings azureStorageSettings)
         {
             _blockchainsProvider = blockchainsProvider;
 
-            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.CashoutProcessorConnString);
+            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.CashoutProcessorConnString);
             var azureClient = azureAccount.CreateCloudTableClient();
 
             _table = azureClient.GetTableReference("Cashout");

@@ -4,20 +4,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 {
+    // TODO: Remove this
     public class DepositWalletsReport
     {
-        private readonly IOptions<ReportSettings> _reportSettings;
+        private readonly ReportSettings _reportSettings;
         private readonly ILog _log;
 
         public DepositWalletsReport(
             ILogFactory logFactory,
-            IOptions<ReportSettings> reportSettings)
+            ReportSettings reportSettings)
         {
             _log = logFactory.CreateLog(this);
             _reportSettings = reportSettings;
@@ -25,7 +25,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 
         public async Task SaveAsync(ISet<DepositWallet> depositWallets)
         {
-            var filePath = _reportSettings.Value.DepositWalletsFilePath;
+            var filePath = _reportSettings.DepositWalletsFilePath;
 
             _log.Info($"Saving deposit wallets. report to {filePath}..");
 

@@ -5,30 +5,31 @@ using Common.Log;
 using Flurl;
 using Flurl.Http;
 using Lykke.Common.Log;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Assets
 {
+    // TODO: Replace with standard assets service client
     public class AssetsClient
     {
         private readonly ILog _log;
-        private readonly IOptions<ServicesSettings> _settings;
+        private readonly string _url;
+
         private Dictionary<string, Asset> _assets;
         
         public AssetsClient(
             ILogFactory logFactory,
-            IOptions<ServicesSettings> settings)
+            AssetsClientSettings settings)
         {
+            _url = settings.ServiceUrl;
             _log = logFactory.CreateLog(this);
-            _settings = settings;
         }
 
         public async Task InitializeAsync()
         {
             _log.Info("Loading assets...");
 
-            var response = await _settings.Value.Assets
+            var response = await _url
                 .AppendPathSegments("api", "v2", "assets")
                 .SetQueryParams(new {includeNonTradable = true})
                 .GetJsonAsync<Asset[]>();

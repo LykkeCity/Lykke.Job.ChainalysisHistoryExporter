@@ -2,8 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
@@ -73,18 +72,12 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
 
         public BilMongoDepositWalletsProvider(
             BlockchainsProvider blockchainsProvider,
-            IOptions<MongoStorageSettings> settings)
+            MongoStorageSettings settings)
         {
-            if (settings?.Value.BlockchainWalletsConnString == null ||
-                settings?.Value.BlockchainWalletsDbName == null)
-            {
-                return;
-            }
-
             _blockchainsProvider = blockchainsProvider;
 
-            var client = new MongoClient(settings.Value.BlockchainWalletsConnString);
-            var db = client.GetDatabase(settings.Value.BlockchainWalletsDbName);
+            var client = new MongoClient(settings.BlockchainWalletsConnString);
+            var db = client.GetDatabase(settings.BlockchainWalletsDbName);
 
             _collection = db.GetCollection<WalletMongoEntity>("blockchain-wallets");
         }

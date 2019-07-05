@@ -5,13 +5,13 @@ using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Assets;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.BitcoinCash;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.LiteCoin;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Lykke.Logs;
 using Lykke.Logs.Loggers.LykkeConsole;
 using Microsoft.Extensions.Options;
@@ -33,7 +33,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             Litecoin.Instance.EnsureRegistered();
 
             _logFactory = LogFactory.Create().AddUnbufferedConsole();
-            var assetsClient = new AssetsClient(_logFactory, Options.Create(new ServicesSettings()));
+            var assetsClient = new AssetsClient(_logFactory, new AssetsClientSettings());
             _blockchainProvider = new BlockchainsProvider(assetsClient);
             _addressNormalizer = new AddressNormalizer
             (
@@ -41,9 +41,9 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                 new IAddressNormalizer[]
                 {
                     new GeneralAddressNormalizer(),
-                    new BtcAddressNormalizer(_blockchainProvider, Options.Create(new BtcSettings {Network = "mainnet"})),
-                    new BchAddressNormalizer(_blockchainProvider, Options.Create(new BchSettings {Network = "mainnet"})),
-                    new LtcAddressNormalizer(_blockchainProvider, Options.Create(new LtcSettings {Network = "ltc-main"})),
+                    new BtcAddressNormalizer(_blockchainProvider, new BtcSettings {Network = "mainnet"}),
+                    new BchAddressNormalizer(_blockchainProvider, new BchSettings {Network = "mainnet"}),
+                    new LtcAddressNormalizer(_blockchainProvider, new LtcSettings {Network = "ltc-main"}),
                     new EthAddressNormalizer(_blockchainProvider),
                 }
             );
@@ -63,11 +63,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var historyProvider = new BtcDepositsHistoryProvider
             (
                 _blockchainProvider,
-                Options.Create(new BtcSettings
+                new BtcSettings
                 {
                     Network = "main", 
                     NinjaUrl = "http://api.qbit.ninja"
-                })
+                }
             );
             var wallet = new DepositWallet
             (
@@ -128,11 +128,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var historyProvider = new LtcDepositsHistoryProvider
             (
                 _logFactory,
-                Options.Create(new LtcSettings
+                new LtcSettings
                 {
                     Network = "ltc-main", 
                     InsightApiUrl = "https://insight.litecore.io/api"
-                }),
+                },
                 _blockchainProvider,
                 _addressNormalizer
             );
@@ -189,11 +189,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var historyProvider = new BchDepositsHistoryProvider
             (
                 _logFactory,
-                Options.Create(new BchSettings
+                new BchSettings
                 {
                     Network = "main", 
                     InsightApiUrl = "https://blockdozer.com/insight-api"
-                }),
+                },
                 _blockchainProvider,
                 _addressNormalizer
             );
@@ -232,10 +232,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var historyProvider = new EthDepositsHistoryProvider
             (
                 _blockchainProvider,
-                Options.Create(new EthSettings
+                new EthSettings
                 {
                     SamuraiUrl = "http://144.76.25.187:8004"
-                }),
+                },
                 _addressNormalizer
             );
             var wallet = new DepositWallet
@@ -273,10 +273,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var historyProvider = new EthDepositsHistoryProvider
             (
                 _blockchainProvider,
-                Options.Create(new EthSettings
+                new EthSettings
                 {
                     SamuraiUrl = "http://144.76.25.187:8004"
-                }),
+                },
                 _addressNormalizer
             );
             var wallet = new DepositWallet

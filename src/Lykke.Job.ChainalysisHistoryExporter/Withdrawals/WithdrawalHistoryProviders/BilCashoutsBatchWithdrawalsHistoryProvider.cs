@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProviders
@@ -75,17 +74,17 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
         public BilCashoutsBatchWithdrawalsHistoryProvider(
             ILogFactory logFactory,
             BlockchainsProvider blockchainsProvider,
-            IOptions<AzureStorageSettings> azureStorageSettings)
+            AzureStorageSettings azureStorageSettings)
         {
             _log = logFactory.CreateLog(this);
             _blockchainsProvider = blockchainsProvider;
 
-            var cashoutProcessorAzureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.CashoutProcessorConnString);
+            var cashoutProcessorAzureAccount = CloudStorageAccount.Parse(azureStorageSettings.CashoutProcessorConnString);
             var cashoutProcessorAzureClient = cashoutProcessorAzureAccount.CreateCloudTableClient();
 
             _cashoutBatchesTable = cashoutProcessorAzureClient.GetTableReference("CashoutsBatch");
 
-            var operationsExecutorAzureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.OperationsExecutorConnString);
+            var operationsExecutorAzureAccount = CloudStorageAccount.Parse(azureStorageSettings.OperationsExecutorConnString);
             var operationsExecutorAzureClient = operationsExecutorAzureAccount.CreateCloudTableClient();
 
             _operationExecutionsTable = operationsExecutorAzureClient.GetTableReference("OperationExecutions");

@@ -2,10 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProviders
@@ -49,11 +48,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProv
 
         public CashOperationsWithdrawalsHistoryProvider(
             BlockchainsProvider blockchainsProvider,
-            IOptions<AzureStorageSettings> azureStorageSettings)
+            AzureStorageSettings azureStorageSettings)
         {
             _blockchainsProvider = blockchainsProvider;
 
-            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.CashOperationsConnString);
+            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.CashOperationsConnString);
             var azureClient = azureAccount.CreateCloudTableClient();
 
             _table = azureClient.GetTableReference("OperationsCash");

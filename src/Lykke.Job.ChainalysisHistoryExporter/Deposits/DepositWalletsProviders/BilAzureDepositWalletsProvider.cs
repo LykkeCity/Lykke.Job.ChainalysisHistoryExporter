@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
@@ -32,15 +31,15 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
         private readonly CloudTable _table;
 
         public BilAzureDepositWalletsProvider(
-            IOptions<AzureStorageSettings> azureStorageSettings,
+            AzureStorageSettings azureStorageSettings,
             BlockchainsProvider blockchainsProvider)
         {
             _blockchainsProvider = blockchainsProvider;
 
-            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.BlockchainWalletsConnString);
+            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.BlockchainWalletsConnString);
             var azureClient = azureAccount.CreateCloudTableClient();
 
-            _table = azureClient.GetTableReference(azureStorageSettings.Value.BlockchainWalletsTable);
+            _table = azureClient.GetTableReference(azureStorageSettings.BlockchainWalletsTable);
         }
 
         public async Task<PaginatedList<DepositWallet>> GetWalletsAsync(string continuation)

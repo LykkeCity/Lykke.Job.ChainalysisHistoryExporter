@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Microsoft.Azure.Cosmos.Table;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
@@ -35,12 +34,12 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
         private readonly CloudTable _table;
 
         public BcnCredentialsDepositWalletsProvider(
-            IOptions<AzureStorageSettings> azureStorageSettings,
+            AzureStorageSettings azureStorageSettings,
             BlockchainsProvider blockchainsProvider)
         {
             _blockchainsProvider = blockchainsProvider;
 
-            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.Value.ClientPersonalInfoConnString);
+            var azureAccount = CloudStorageAccount.Parse(azureStorageSettings.ClientPersonalInfoConnString);
             var azureClient = azureAccount.CreateCloudTableClient();
 
             _table = azureClient.GetTableReference("BcnClientCredentials");

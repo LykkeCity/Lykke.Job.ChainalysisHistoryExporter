@@ -7,9 +7,7 @@ using Common.Log;
 using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Options;
 using Polly;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
 
@@ -25,15 +23,12 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
 
         public WithdrawalsExporter(
             ILogFactory logFactory,
-            IEnumerable<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders,
-            IOptions<WithdrawalHistoryProvidersSettings> withdrawalsHistoryProvidersSettings,
+            IReadOnlyCollection<IWithdrawalsHistoryProvider> withdrawalsHistoryProviders,
             AddressNormalizer addressNormalizer)
         {
             _log = logFactory.CreateLog(this);
             _addressNormalizer = addressNormalizer;
-            _withdrawalsHistoryProviders = withdrawalsHistoryProviders
-                .Where(x => withdrawalsHistoryProvidersSettings.Value.Providers?.Contains(x.GetType().Name) ?? false)
-                .ToArray();
+            _withdrawalsHistoryProviders = withdrawalsHistoryProviders;
         }
 
         public async Task ExportAsync()

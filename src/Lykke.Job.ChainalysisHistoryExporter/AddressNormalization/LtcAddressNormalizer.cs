@@ -1,7 +1,6 @@
 ﻿using System;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using NBitcoin;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
@@ -13,10 +12,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
 
         public LtcAddressNormalizer(
             BlockchainsProvider blockchainsProvider,
-            IOptions<LtcSettings> settings)
+            LtcSettings settings)
         {
             _liteCoin = blockchainsProvider.GetLiteCoin();
-            _network = Network.GetNetwork(settings.Value.Network);
+            _network = Network.GetNetwork(settings.Network);
         }
 
         public bool CanNormalize(string cryptoCurrency)

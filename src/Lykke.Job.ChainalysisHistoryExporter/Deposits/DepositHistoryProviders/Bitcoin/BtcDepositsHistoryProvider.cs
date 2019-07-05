@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using NBitcoin;
 using QBitNinja.Client.Models;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
@@ -19,10 +18,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.
 
         public BtcDepositsHistoryProvider(
             BlockchainsProvider blockchainsProvider,
-            IOptions<BtcSettings> settings)
+            BtcSettings settings)
         {
             _bitcoin = blockchainsProvider.GetBitcoin();
-            _client = new CustomQBitNinjaClient(new Uri(settings.Value.NinjaUrl), Network.GetNetwork(settings.Value.Network));
+            _client = new CustomQBitNinjaClient(new Uri(settings.NinjaUrl), Network.GetNetwork(settings.Network));
         }
 
         public bool CanProvideHistoryFor(DepositWallet depositWallet)

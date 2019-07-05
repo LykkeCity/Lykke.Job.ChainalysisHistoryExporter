@@ -1,4 +1,4 @@
-﻿namespace Lykke.Job.ChainalysisHistoryExporter.Configuration
+﻿namespace Lykke.Job.ChainalysisHistoryExporter.Settings
 {
     public class LtcSettings
     {

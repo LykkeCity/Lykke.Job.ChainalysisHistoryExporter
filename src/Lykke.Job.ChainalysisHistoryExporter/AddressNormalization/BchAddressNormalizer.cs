@@ -1,7 +1,6 @@
 ﻿using System;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
-using Lykke.Job.ChainalysisHistoryExporter.Configuration;
-using Microsoft.Extensions.Options;
+using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using NBitcoin;
 using NBitcoin.Altcoins;
 
@@ -15,10 +14,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
 
         public BchAddressNormalizer(
             BlockchainsProvider blockchainsProvider,
-            IOptions<BchSettings> settings)
+            BchSettings settings)
         {
             _bitcoinCash = blockchainsProvider.GetBitcoinCash();
-            _btcNetwork = Network.GetNetwork(settings.Value.Network);
+            _btcNetwork = Network.GetNetwork(settings.Network);
             _bchNetwork = _btcNetwork == Network.Main ? BCash.Instance.Mainnet : BCash.Instance.Regtest;
         }
 

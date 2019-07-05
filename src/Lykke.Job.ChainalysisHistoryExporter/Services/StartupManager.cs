@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Common.Log;
+using Lykke.Job.ChainalysisHistoryExporter.Assets;
+using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Sdk;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Services
@@ -15,17 +17,23 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Services
     public class StartupManager : IStartupManager
     {
         private readonly ILog _log;
+        private readonly Exporter _exporter;
+        private readonly AssetsClient _assetsClient;
 
-        public StartupManager(ILogFactory logFactory)
+        public StartupManager(
+            ILogFactory logFactory,
+            Exporter exporter,
+            AssetsClient assetsClient)
         {
             _log = logFactory.CreateLog(this);
+            _exporter = exporter;
+            _assetsClient = assetsClient;
         }
 
         public async Task StartAsync()
         {
-            // TODO: Implement your startup logic here. Good idea is to log every step
-
-            await Task.CompletedTask;
+            await _assetsClient.InitializeAsync();
+            await _exporter.ExportAsync();
         }
     }
 }
