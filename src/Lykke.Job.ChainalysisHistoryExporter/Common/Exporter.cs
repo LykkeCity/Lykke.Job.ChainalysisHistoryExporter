@@ -39,13 +39,13 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Common
                 // Localizes lifetime of the withdrawals exported to free up consumed memory when it finished.
                 var withdrawalsExporter = _serviceProvider.GetRequiredService<WithdrawalsExporter>();
 
-                await withdrawalsExporter.ExportAsync(_transactionsReport);
+                await withdrawalsExporter.ExportAsync(_transactionsReportBuilder);
 
                 // ReSharper disable once RedundantAssignment
                 withdrawalsExporter = null;
             }
 
-            await _depositsExporter.ExportAsync(_transactionsReport);
+            await _depositsExporter.ExportAsync(_transactionsReportBuilder);
 
             await _transactionsReportBuilder.SaveIncrementAsync();
             await _transactionsReportBuilder.SaveSnapshotAsync();

@@ -31,10 +31,17 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
 
             builder.RegisterType<Exporter>().AsSelf();
             
-            builder.RegisterType<TransactionsReport>()
+            builder.RegisterType<TransactionsReportBuilder>()
                 .AsSelf()
                 .WithParameter(TypedParameter.From(_settings.Report));
             
+            builder.RegisterType<TransactionsReportReader>().AsSelf();
+            builder.RegisterType<TransactionsReportWriter>().AsSelf();
+            builder.RegisterType<TransactionsIncrementRepository>()
+                .WithParameter(TypedParameter.From(_settings.Report))
+                .AsSelf();
+            builder.RegisterType<TransactionsSnapshotRepository>().AsSelf();
+
             builder.RegisterType<AssetsClient>()
                 .WithParameter(TypedParameter.From(_settings.Assets))
                 .AsSelf()

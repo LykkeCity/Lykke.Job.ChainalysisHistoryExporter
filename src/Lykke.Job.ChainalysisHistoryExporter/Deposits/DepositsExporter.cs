@@ -37,7 +37,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             _concurrencySemaphore = new SemaphoreSlim(8);
         }
 
-        public async Task ExportAsync(TransactionsReport report)
+        public async Task ExportAsync(TransactionsReportBuilder reportBuilder)
         {
             var depositWallets = await LoadDepositWalletsAsync();
 
@@ -54,7 +54,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             {
                 await _concurrencySemaphore.WaitAsync();
 
-                tasks.Add(ProcessDepositWalletAsync(report, wallet));
+                tasks.Add(ProcessDepositWalletAsync(reportBuilder, wallet));
 
                 if (tasks.Count >= 500)
                 {
@@ -174,7 +174,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             return new DepositWallet(wallet.UserId, address, wallet.CryptoCurrency);
         }
 
-        private async Task ProcessDepositWalletAsync(TransactionsReport report, DepositWallet wallet)
+        private async Task ProcessDepositWalletAsync(TransactionsReportBuilder reportBuilder, DepositWallet wallet)
         {
             try
             {
@@ -217,7 +217,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
                                 continue;
                             }
 
-                            report.AddTransaction(normalizedTransaction);
+                            reportBuilder.AddTransaction(normalizedTransaction);
 
                             Interlocked.Increment(ref _exportedDepositsCount);
                             ++processedWalletTransactionsCount;

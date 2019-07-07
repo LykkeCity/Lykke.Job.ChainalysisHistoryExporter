@@ -4,7 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
+namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 {
     public class TransactionsReportWriter
     {

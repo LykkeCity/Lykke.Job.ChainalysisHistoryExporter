@@ -7,6 +7,9 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
         [AzureTableCheck]
         public string LogsConnString { get; set; }
 
+        [AzureBlobCheck]
+        public string ReportStorageConnString { get; set; }
+
         [AzureTableCheck]
         public string CashOperationsConnString { get; set; }
         

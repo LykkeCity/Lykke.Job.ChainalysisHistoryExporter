@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
+namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 {
     public class TransactionsReportBuilder
     {

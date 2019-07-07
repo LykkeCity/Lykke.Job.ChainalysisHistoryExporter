@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Lykke.Tools.ChainalysisHistoryExporter.AddressNormalization;
+using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 
-namespace Lykke.Tools.ChainalysisHistoryExporter.Reporting
+namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 {
     public class TransactionsReportReader
     {

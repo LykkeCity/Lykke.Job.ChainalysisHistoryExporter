@@ -31,7 +31,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
             _withdrawalsHistoryProviders = withdrawalsHistoryProviders;
         }
 
-        public async Task ExportAsync(TransactionsReport report)
+        public async Task ExportAsync(TransactionsReportBuilder reportBuilder)
         {
             _log.Info("Exporting withdrawals...", new
             {
@@ -42,7 +42,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
 
             foreach (var historyProvider in _withdrawalsHistoryProviders)
             {
-                tasks.Add(ExportProviderWithdrawals(report, historyProvider));
+                tasks.Add(ExportProviderWithdrawals(reportBuilder, historyProvider));
             }
 
             await Task.WhenAll(tasks);
@@ -50,7 +50,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
             _log.Info($"Withdrawals exporting done. {_exportedWithdrawalsCount} withdrawals exported");
         }
 
-        private async Task ExportProviderWithdrawals(TransactionsReport report, IWithdrawalsHistoryProvider historyProvider)
+        private async Task ExportProviderWithdrawals(TransactionsReportBuilder reportBuilder, IWithdrawalsHistoryProvider historyProvider)
         {
             PaginatedList<Transaction> transactions = null;
 
@@ -81,7 +81,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
                         continue;
                     }
 
-                    report.AddTransaction(normalizedTransaction);
+                    reportBuilder.AddTransaction(normalizedTransaction);
 
                     var exportedWithdrawalsCount = Interlocked.Increment(ref _exportedWithdrawalsCount);
 
