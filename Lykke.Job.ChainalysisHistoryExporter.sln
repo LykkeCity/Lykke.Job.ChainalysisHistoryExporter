@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Tests", "1. Tests", "{43
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InvalidAddressRemover", "tools\InvalidAddressRemover\InvalidAddressRemover.csproj", "{61B9C3E6-E7A5-4255-B512-56F0189C1749}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReportSnapshotUploader", "tools\ReportSnapshotUploader\ReportSnapshotUploader.csproj", "{F14240A8-8F98-4CAF-BCA7-3A6C9E3BFB21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{61B9C3E6-E7A5-4255-B512-56F0189C1749}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61B9C3E6-E7A5-4255-B512-56F0189C1749}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61B9C3E6-E7A5-4255-B512-56F0189C1749}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F14240A8-8F98-4CAF-BCA7-3A6C9E3BFB21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F14240A8-8F98-4CAF-BCA7-3A6C9E3BFB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F14240A8-8F98-4CAF-BCA7-3A6C9E3BFB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F14240A8-8F98-4CAF-BCA7-3A6C9E3BFB21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A61FFDEE-5725-4650-A788-6E55EE5EFD5B} = {43039813-1CA8-49FA-81BC-E8DA6AE3D934}
 		{61B9C3E6-E7A5-4255-B512-56F0189C1749} = {5765F23A-AE6E-46D1-A2CD-36A13E8840EE}
+		{F14240A8-8F98-4CAF-BCA7-3A6C9E3BFB21} = {5765F23A-AE6E-46D1-A2CD-36A13E8840EE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EB6C0EF4-AA6A-444D-8603-3669F73A58BC}
