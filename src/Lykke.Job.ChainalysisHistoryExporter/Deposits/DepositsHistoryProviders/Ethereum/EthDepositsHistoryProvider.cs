@@ -7,7 +7,7 @@ using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
+namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ethereum
 {
     public class EthDepositsHistoryProvider : IDepositsHistoryProvider
     {

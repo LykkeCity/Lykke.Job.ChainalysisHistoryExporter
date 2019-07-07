@@ -10,7 +10,7 @@ using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Microsoft.Azure.Cosmos.Table;
 using Newtonsoft.Json;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalHistoryProviders
+namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalsHistoryProviders
 {
     public class BilCashoutsBatchWithdrawalsHistoryProvider : IWithdrawalsHistoryProvider
     {

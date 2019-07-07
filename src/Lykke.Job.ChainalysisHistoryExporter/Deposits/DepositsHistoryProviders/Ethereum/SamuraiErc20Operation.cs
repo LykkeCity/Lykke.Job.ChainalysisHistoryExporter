@@ -1,7 +1,7 @@
-﻿namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
+﻿namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ethereum
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class SamuraiOperation
+    public class SamuraiErc20Operation
     {
         public string TransactionHash { get; set; }
         public string To { get; set; }

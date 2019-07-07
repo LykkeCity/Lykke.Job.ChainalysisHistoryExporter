@@ -7,9 +7,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
         public AzureStorageSettings AzureStorage { get; set; }
         public MongoStorageSettings MongoStorage { get; set; }
         public DepositWalletProvidersSettings DepositWalletProviders { get; set; }
-        public DepositHistoryProvidersSettings DepositHistoryProviders { get; set; }
+        public DepositsHistoryProvidersSettings DepositsHistoryProviders { get; set; }
         public WithdrawalHistoryProvidersSettings WithdrawalHistoryProviders { get; set; }
         public ReportSettings Report { get; set; }
+        public ScheduleSettings Schedule { get; set; }
         public AssetsClientSettings Assets { get; set; }
         public BtcSettings Btc { get; set; }
         public EthSettings Eth { get; set; }

@@ -23,6 +23,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterInstance(_settings.AzureStorage);
+            builder.RegisterInstance(_settings.MongoStorage);
             builder.RegisterInstance(_settings.Btc);
             builder.RegisterInstance(_settings.Eth);
             builder.RegisterInstance(_settings.Ltc);
@@ -30,14 +31,9 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
 
             builder.RegisterType<Exporter>().AsSelf();
             
-            builder.RegisterType<DepositWalletsReport>()
-                .AsSelf()
-                .WithParameter(TypedParameter.From(_settings.Report));
-
             builder.RegisterType<TransactionsReport>()
                 .AsSelf()
-                .WithParameter(TypedParameter.From(_settings.Report))
-                .SingleInstance();
+                .WithParameter(TypedParameter.From(_settings.Report));
             
             builder.RegisterType<AssetsClient>()
                 .WithParameter(TypedParameter.From(_settings.Assets))
@@ -45,10 +41,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
                 .SingleInstance();
             
             builder.RegisterType<BlockchainsProvider>().AsSelf().SingleInstance();
+            builder.RegisterType<AddressNormalizer>().AsSelf().SingleInstance();
             builder.RegisterType<WithdrawalsExporter>().AsSelf();
             builder.RegisterType<DepositsExporter>().AsSelf();
-            builder.RegisterType<AddressNormalizer>().AsSelf().SingleInstance();
-
+            
             builder.RegisterType<GeneralAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<BtcAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<BchAddressNormalizer>().As<IAddressNormalizer>();
@@ -57,7 +53,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
 
             RegisterImplementations<IWithdrawalsHistoryProvider>(builder, _settings.WithdrawalHistoryProviders.Providers);
             RegisterImplementations<IDepositWalletsProvider>(builder, _settings.DepositWalletProviders.Providers);
-            RegisterImplementations<IDepositsHistoryProvider>(builder, _settings.DepositHistoryProviders.Providers);
+            RegisterImplementations<IDepositsHistoryProvider>(builder, _settings.DepositsHistoryProviders.Providers);
         }
 
         private static void RegisterImplementations<TService>(ContainerBuilder builder, IEnumerable<string> implementationNames)

@@ -1,4 +1,4 @@
-﻿namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
+﻿namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ethereum
 {
     public class SamuraiContinuationToken
     {

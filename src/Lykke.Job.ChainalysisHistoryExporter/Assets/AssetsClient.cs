@@ -25,7 +25,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Assets
             _log = logFactory.CreateLog(this);
         }
 
-        public async Task InitializeAsync()
+        public async Task LoadAssetsAsync()
         {
             _log.Info("Loading assets...");
 

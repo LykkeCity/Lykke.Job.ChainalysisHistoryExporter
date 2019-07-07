@@ -4,7 +4,7 @@ using Flurl.Http;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Newtonsoft.Json;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Ethereum
+namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ethereum
 {
     public class SamuraiClient
     {

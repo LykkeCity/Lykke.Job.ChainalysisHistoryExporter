@@ -10,5 +10,8 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
         
         [Optional]
         public string BlockchainWalletsDbName { get; set; }
+
+        [MongoCheck]
+        public string HangFireConnString { get; set; }
     }
 }

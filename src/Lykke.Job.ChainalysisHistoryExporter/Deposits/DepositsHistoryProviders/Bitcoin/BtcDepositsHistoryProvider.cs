@@ -9,7 +9,7 @@ using NBitcoin;
 using QBitNinja.Client.Models;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.Bitcoin
+namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Bitcoin
 {
     public class BtcDepositsHistoryProvider : IDepositsHistoryProvider
     {

@@ -15,7 +15,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
     public class DepositsExporter : IDisposable
     {
         private readonly ILog _log;
-        private readonly DepositWalletsReport _depositWalletsReport;
         private readonly AddressNormalizer _addressNormalizer;
         private readonly IReadOnlyCollection<IDepositWalletsProvider> _depositWalletsProviders;
         private readonly IReadOnlyCollection<IDepositsHistoryProvider> _depositsHistoryProviders;
@@ -26,13 +25,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
         
         public DepositsExporter(
             ILogFactory logFactory,
-            DepositWalletsReport depositWalletsReport,
             AddressNormalizer addressNormalizer,
             IReadOnlyCollection<IDepositWalletsProvider> depositWalletsProviders,
             IReadOnlyCollection<IDepositsHistoryProvider> depositsHistoryProviders)
         {
             _log = logFactory.CreateLog(this);
-            _depositWalletsReport = depositWalletsReport;
             _addressNormalizer = addressNormalizer;
             _depositWalletsProviders = depositWalletsProviders;
             _depositsHistoryProviders = depositsHistoryProviders;
@@ -40,13 +37,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             _concurrencySemaphore = new SemaphoreSlim(8);
         }
 
-        public async Task ExportAsync()
+        public async Task ExportAsync(TransactionsReport report)
         {
             var depositWallets = await LoadDepositWalletsAsync();
 
             _totalDepositWalletsCount = depositWallets.Count;
-
-            await _depositWalletsReport.SaveAsync(depositWallets);
 
             var tasks = new List<Task>(512);
 
@@ -59,7 +54,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             {
                 await _concurrencySemaphore.WaitAsync();
 
-                tasks.Add(ProcessDepositWalletAsync(wallet));
+                tasks.Add(ProcessDepositWalletAsync(report, wallet));
 
                 if (tasks.Count >= 500)
                 {
@@ -179,7 +174,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
             return new DepositWallet(wallet.UserId, address, wallet.CryptoCurrency);
         }
 
-        private async Task ProcessDepositWalletAsync(DepositWallet wallet)
+        private async Task ProcessDepositWalletAsync(TransactionsReport report, DepositWallet wallet)
         {
             try
             {
@@ -222,7 +217,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
                                 continue;
                             }
 
-                            _transactionsReportBuilder.AddTransaction(normalizedTransaction);
+                            report.AddTransaction(normalizedTransaction);
 
                             Interlocked.Increment(ref _exportedDepositsCount);
                             ++processedWalletTransactionsCount;

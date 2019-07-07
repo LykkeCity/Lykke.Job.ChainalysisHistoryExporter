@@ -14,7 +14,7 @@ using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Newtonsoft.Json;
 using Transaction = Lykke.Job.ChainalysisHistoryExporter.Reporting.Transaction;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositHistoryProviders.BitcoinCash
+namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.BitcoinCash
 {
     public class BchDepositsHistoryProvider : IDepositsHistoryProvider
     {
