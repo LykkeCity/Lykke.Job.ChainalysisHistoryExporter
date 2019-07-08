@@ -14,7 +14,6 @@ using Lykke.Job.ChainalysisHistoryExporter.Reporting;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Lykke.Logs;
 using Lykke.Logs.Loggers.LykkeConsole;
-using Microsoft.Extensions.Options;
 using NBitcoin.Altcoins;
 using NUnit.Framework;
 

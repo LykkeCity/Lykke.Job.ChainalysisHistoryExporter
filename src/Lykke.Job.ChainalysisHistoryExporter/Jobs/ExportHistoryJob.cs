@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Lykke.Job.ChainalysisHistoryExporter.Assets;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 
@@ -10,6 +12,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Jobs
 
         private readonly AssetsClient _assetsClient;
         private readonly Exporter _exporter;
+        private readonly SemaphoreSlim _lock;
 
         public ExportHistoryJob(
             AssetsClient assetsClient,
@@ -17,12 +20,25 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Jobs
         {
             _assetsClient = assetsClient;
             _exporter = exporter;
+            _lock = new SemaphoreSlim(1);
         }
 
         public async Task ExecuteAsync()
         {
-            await _assetsClient.LoadAssetsAsync();
-            await _exporter.ExportAsync();
+            if (!await _lock.WaitAsync(TimeSpan.FromMilliseconds(100)))
+            {
+                return;
+            }
+
+            try
+            {
+                await _assetsClient.LoadAssetsAsync();
+                await _exporter.ExportAsync();
+            }
+            finally
+            {
+                _lock.Release();
+            }
         }
     }
 }

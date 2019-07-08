@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
@@ -7,17 +8,18 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
     public class TransactionsReportBuilder
     {
         private readonly TransactionsSnapshotRepository _snapshotRepository;
-        private readonly TransactionsIncrementRepository _incrementRepository;
+        private readonly IReadOnlyCollection<ITransactionsIncrementRepository> _incrementRepositories;
         private readonly HashSet<Transaction> _increment;
         private HashSet<Transaction> _snapshot;
         private bool _incrementSaved;
+        private DateTimeOffset? _snapshotModifiedAt;
 
         public TransactionsReportBuilder(
             TransactionsSnapshotRepository snapshotRepository,
-            TransactionsIncrementRepository incrementRepository)
+            IReadOnlyCollection<ITransactionsIncrementRepository> incrementRepositories)
         {
             _snapshotRepository = snapshotRepository;
-            _incrementRepository = incrementRepository;
+            _incrementRepositories = incrementRepositories;
             _increment = new HashSet<Transaction>(262144);
         }
 
@@ -28,7 +30,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
                 throw new InvalidOperationException("Report snapshot has been loaded already");
             }
 
-            _snapshot = await _snapshotRepository.LoadAsync();
+            (_snapshot, _snapshotModifiedAt) = await _snapshotRepository.LoadAsync();
         }
 
         public void AddTransaction(Transaction tx)
@@ -71,7 +73,13 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 
             _incrementSaved = true;
 
-            await _incrementRepository.SaveAsync(_increment);
+            var utcNow = DateTime.UtcNow;
+            var incrementFrom = _snapshotModifiedAt?.UtcDateTime ?? utcNow;
+            var incrementTo = utcNow;
+
+            var tasks = _incrementRepositories.Select(incrementRepository => incrementRepository.SaveAsync(_increment, incrementFrom, incrementTo));
+
+            await Task.WhenAll(tasks);
         }
 
         public async Task SaveSnapshotAsync()

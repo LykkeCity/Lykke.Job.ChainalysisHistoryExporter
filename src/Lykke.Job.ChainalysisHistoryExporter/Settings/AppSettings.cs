@@ -9,6 +9,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
         public DepositWalletProvidersSettings DepositWalletProviders { get; set; }
         public DepositsHistoryProvidersSettings DepositsHistoryProviders { get; set; }
         public WithdrawalHistoryProvidersSettings WithdrawalHistoryProviders { get; set; }
+        public SlackSettings Slack { get; set; }
         public ReportSettings Report { get; set; }
         public ScheduleSettings Schedule { get; set; }
         public AssetsClientSettings Assets { get; set; }

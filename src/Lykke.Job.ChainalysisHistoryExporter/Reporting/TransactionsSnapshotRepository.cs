@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Common.Log;
@@ -36,7 +37,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
             _blob = blobContainer.GetBlockBlobReference("full-report.csv");
         }
 
-        public async Task<HashSet<Transaction>> LoadAsync()
+        public async Task<(HashSet<Transaction> Snapshot, DateTimeOffset? LastModified)> LoadAsync()
         {
             _log.Info("Loading transactions snapshot...");
 
@@ -61,7 +62,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 
             _log.Info($"Transactions snapshot with {snapshot.Count} transactions loaded");
 
-            return snapshot;
+            return (snapshot, _blob.Properties.LastModified);
         }
 
         public async Task SaveAsync(HashSet<Transaction> snapshot)

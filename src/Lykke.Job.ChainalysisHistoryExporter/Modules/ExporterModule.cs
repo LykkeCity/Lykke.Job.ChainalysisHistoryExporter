@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autofac;
 using Lykke.Job.ChainalysisHistoryExporter.AddressNormalization;
 using Lykke.Job.ChainalysisHistoryExporter.Assets;
@@ -24,23 +25,22 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
         {
             builder.RegisterInstance(_settings.AzureStorage);
             builder.RegisterInstance(_settings.MongoStorage);
+            builder.RegisterInstance(_settings.Slack);
             builder.RegisterInstance(_settings.Btc);
             builder.RegisterInstance(_settings.Eth);
             builder.RegisterInstance(_settings.Ltc);
             builder.RegisterInstance(_settings.Bch);
 
             builder.RegisterType<Exporter>().AsSelf();
-            
+
             builder.RegisterType<TransactionsReportBuilder>()
-                .AsSelf()
-                .WithParameter(TypedParameter.From(_settings.Report));
-            
+                .AsSelf();
+
             builder.RegisterType<TransactionsReportReader>().AsSelf();
             builder.RegisterType<TransactionsReportWriter>().AsSelf();
-            builder.RegisterType<TransactionsIncrementRepository>()
-                .WithParameter(TypedParameter.From(_settings.Report))
-                .AsSelf();
             builder.RegisterType<TransactionsSnapshotRepository>().AsSelf();
+
+            RegisterImplementations<ITransactionsIncrementRepository>(builder, _settings.Report.Repositories);
 
             builder.RegisterType<AssetsClient>()
                 .WithParameter(TypedParameter.From(_settings.Assets))
@@ -68,7 +68,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
             var serviceType = typeof(TService);
             var serviceAssembly = serviceType.Assembly;
             var serviceNamespace = serviceType.Namespace;
-            var implementationsSubNamespace = $"{serviceType.Name.Substring(1)}s";
+            var implementationsSubNamespace = GetImplementationsSubNamespace(serviceType);
 
             foreach (var implementationName in implementationNames)
             {
@@ -77,6 +77,23 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
 
                 builder.RegisterType(implementationType).As<TService>();
             }
+        }
+
+        private static string GetImplementationsSubNamespace(Type serviceType)
+        {
+            var serviceTypeName = serviceType.Name;
+
+            if (serviceTypeName.EndsWith('y'))
+            {
+                return $"{serviceTypeName.Substring(1, serviceTypeName.Length - 2)}ies";
+            }
+
+            if (serviceTypeName.EndsWith('s'))
+            {
+                return $"{serviceTypeName.Substring(1)}es";
+            }
+
+            return $"{serviceType.Name.Substring(1)}s";
         }
     }
 }
