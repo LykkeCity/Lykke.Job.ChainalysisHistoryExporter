@@ -59,11 +59,11 @@ WithdrawalsHistoryProviders:
             - JsonArray
 Slack:
     ReportChannel:
-        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsAzureTable
+        settings-key: ChainalysisHistoryExporterJob-SlackReportChannel
         types:
             - Optional
     AuthToken:
-        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsAzureTable
+        settings-key: ChainalysisHistoryExporterJob-SlackReportAuthKey
         types:
             - Optional
 Report:
