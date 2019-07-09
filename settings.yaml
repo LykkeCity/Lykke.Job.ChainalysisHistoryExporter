@@ -7,40 +7,40 @@ AzureStorage:
         settings-key: ChainalysisHistoryExporterJob-DataConnString
         types:
             - AzureTableStorage
-    CashoutProcessorConnString
+    CashoutProcessorConnString:
         settings-key: ChainalysisHistoryExporterJob-BilCashoutProcessorConnString
         types:
             - AzureTableStorage
-    OperationsExecutorConnString
+    OperationsExecutorConnString:
         settings-key: ChainalysisHistoryExporterJob-BilOperationsExecutorConnString
         types:
             - AzureTableStorage
-    BlockchainWalletsConnString
+    BlockchainWalletsConnString:
         settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsAzureConnString
         types:
             - AzureTableStorage
-    ClientPersonalInfoConnString
+    ClientPersonalInfoConnString:
         settings-key: PersonalInfoConnString
         types:
             - AzureTableStorage
-    CashOperationsConnString
+    CashOperationsConnString:
         settings-key: CashOperationsConnString
         types:
             - AzureTableStorage
-    BlockchainWalletsTable
+    BlockchainWalletsTable:
         settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsAzureTable
         types:
             - Optional
 MongoStorage:
-    BlockchainWalletsConnString
+    BlockchainWalletsConnString:
         settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsMongoConnString
         types:
             - Optional
-    BlockchainWalletsDbName
+    BlockchainWalletsDbName:
         settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsMongoDbName
         types:
             - Optional
-    HangFireConnString
+    HangFireConnString:
         settings-key: ChainalysisHistoryExporterJob-HangfireConnString
 DepositWalletsProviders:
     Providers:
