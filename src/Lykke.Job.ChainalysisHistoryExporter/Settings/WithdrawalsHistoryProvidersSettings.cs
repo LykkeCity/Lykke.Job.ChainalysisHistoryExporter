@@ -2,7 +2,7 @@
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Settings
 {
-    public class WithdrawalHistoryProvidersSettings
+    public class WithdrawalsHistoryProvidersSettings
     {
         public IReadOnlyCollection<string> Providers { get; set; }
     }

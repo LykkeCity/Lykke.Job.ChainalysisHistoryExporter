@@ -58,8 +58,8 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
             builder.RegisterType<LtcAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<EthAddressNormalizer>().As<IAddressNormalizer>();
 
-            RegisterImplementations<IWithdrawalsHistoryProvider>(builder, _settings.WithdrawalHistoryProviders.Providers);
-            RegisterImplementations<IDepositWalletsProvider>(builder, _settings.DepositWalletProviders.Providers);
+            RegisterImplementations<IWithdrawalsHistoryProvider>(builder, _settings.WithdrawalsHistoryProviders.Providers);
+            RegisterImplementations<IDepositWalletsProvider>(builder, _settings.DepositWalletsProviders.Providers);
             RegisterImplementations<IDepositsHistoryProvider>(builder, _settings.DepositsHistoryProviders.Providers);
         }
 
