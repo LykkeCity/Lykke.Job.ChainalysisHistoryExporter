@@ -33,11 +33,11 @@ AzureStorage:
             - Optional
 MongoStorage:
     BlockchainWalletsConnString:
-        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsMongoConnString
+        settings-key: BilBlockchainWalletsMongoConnString
         types:
             - Optional
     BlockchainWalletsDbName:
-        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsMongoDbName
+        settings-key: BilBlockchainWalletsMongoDbName
         types:
             - Optional
     HangFireConnString:
