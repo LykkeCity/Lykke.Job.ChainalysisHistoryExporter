@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Dockerfile">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.2" />
+    <PackageReference Include="Flurl" Version="2.8.2" />
+    <PackageReference Include="Flurl.Http" Version="2.4.2" />
+    <PackageReference Include="Hangfire.Autofac" Version="2.3.1" />
+    <PackageReference Include="Hangfire.Core" Version="1.7.4" />
+    <PackageReference Include="Hangfire.Mongo" Version="0.6.1" />
+    <PackageReference Include="Lykke.Common.ApiLibrary" Version="2.4.0" />
+    <PackageReference Include="Lykke.Logs" Version="7.3.0" />
+    <PackageReference Include="Lykke.Logs.Hangfire" Version="1.0.0" />
+    <PackageReference Include="Lykke.MonitoringServiceApiCaller" Version="1.8.0" />
+    <PackageReference Include="Lykke.Sdk" Version="5.14.0" />
+    <PackageReference Include="Lykke.SettingsReader" Version="5.2.0" />
+    <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="2.0.5" />
+    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
+    <PackageReference Include="Multiformats.Hash" Version="1.5.0" />
+    <PackageReference Include="NBitcoin.Altcoins" Version="1.0.2.8" />
+    <PackageReference Include="QBitNinja.Client" Version="1.0.3.50" />
+    <PackageReference Include="SlackAPI" Version="1.1.1" />
+  </ItemGroup>
+</Project>

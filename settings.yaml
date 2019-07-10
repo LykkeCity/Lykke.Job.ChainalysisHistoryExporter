@@ -1,0 +1,111 @@
+AzureStorage:
+    LogsConnString:
+        settings-key: ChainalysisHistoryExporterJob-LogsConnString
+        types:
+            - AzureTableStorage
+    ReportStorageConnString:
+        settings-key: ChainalysisHistoryExporterJob-DataConnString
+        types:
+            - AzureTableStorage
+    CashoutProcessorConnString:
+        settings-key: ChainalysisHistoryExporterJob-BilCashoutProcessorConnString
+        types:
+            - AzureTableStorage
+    OperationsExecutorConnString:
+        settings-key: ChainalysisHistoryExporterJob-BilOperationsExecutorConnString
+        types:
+            - AzureTableStorage
+    BlockchainWalletsConnString:
+        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsAzureConnString
+        types:
+            - AzureTableStorage
+    ClientPersonalInfoConnString:
+        settings-key: PersonalInfoConnString
+        types:
+            - AzureTableStorage
+    CashOperationsConnString:
+        settings-key: CashOperationsConnString
+        types:
+            - AzureTableStorage
+    BlockchainWalletsTable:
+        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsAzureTable
+        types:
+            - Optional
+MongoStorage:
+    BlockchainWalletsConnString:
+        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsMongoConnString
+        types:
+            - Optional
+    BlockchainWalletsDbName:
+        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsMongoDbName
+        types:
+            - Optional
+    HangFireConnString:
+        settings-key: ChainalysisHistoryExporterJob-HangfireConnString
+DepositWalletsProviders:
+    Providers:
+        settings-key: ChainalysisHistoryExporterJob-DepositWalletsProviders
+        types:
+            - JsonArray
+DepositsHistoryProviders:
+    Providers:
+        settings-key: ChainalysisHistoryExporterJob-DepositsHistoryProviders
+        types:
+            - JsonArray
+WithdrawalsHistoryProviders:
+    Providers:
+        settings-key: ChainalysisHistoryExporterJob-WithdrawalsHistoryProviders
+        types:
+            - JsonArray
+Slack:
+    ReportChannel:
+        settings-key: ChainalysisHistoryExporterJob-SlackReportChannel
+        types:
+            - Optional
+    AuthToken:
+        settings-key: ChainalysisHistoryExporterJob-SlackReportAuthKey
+        types:
+            - Optional
+Report:
+    Repositories:
+        settings-key: ChainalysisHistoryExporterJob-ReportRepositories
+        types:
+            - JsonArray
+Schedule:
+    ExportHistoryCron:
+        settings-key: ChainalysisHistoryExporterJob-ExportHistoryScheduleCron
+Btc:
+    Network:
+        settings-key: ChainalysisHistoryExporterJob-BtcNetwork
+    NinjaUrl:
+        settings-key: ChainalysisHistoryExporterJob-BtcNinjaUrl
+Eth:
+    SamuraiUrl:
+        settings-key: ChainalysisHistoryExporterJob-EthSamuraiUrl
+Ltc:
+    Network:
+        settings-key: ChainalysisHistoryExporterJob-LtcNetwork
+    InsightApiUrl:
+        settings-key: ChainalysisHistoryExporterJob-LtcInsightApiUrl
+Bch:
+    Network:
+        settings-key: ChainalysisHistoryExporterJob-BchNetwork
+    InsightApiUrl:
+        settings-key: ChainalysisHistoryExporterJob-BchInsightApiUrl
+Assets:
+    ServiceUrl:
+        settings-key: AssetsServiceUrl
+    CacheExpirationPeriod:
+        settings-key: ChainalysisHistoryExporterJob-AssetsCacheExpirationPeriod
+SlackNotifications:
+    AzureQueue:
+        ConnectionString:
+            settings-key: SlackNotificationsConnString
+            types:
+                - AzureTableStorage
+        QueueName:
+            settings-key: SlackQueueName
+MonitoringServiceClient:
+    MonitoringServiceUrl:
+        settings-key: MonitoringServiceUrl
+
