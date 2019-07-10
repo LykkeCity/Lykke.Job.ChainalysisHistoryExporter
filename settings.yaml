@@ -8,15 +8,15 @@ AzureStorage:
         types:
             - AzureTableStorage
     CashoutProcessorConnString:
-        settings-key: ChainalysisHistoryExporterJob-BilCashoutProcessorConnString
+        settings-key: BilCashoutProcessorConnString
         types:
             - AzureTableStorage
     OperationsExecutorConnString:
-        settings-key: ChainalysisHistoryExporterJob-BilOperationsExecutorConnString
+        settings-key: BilOperationsExecutorConnString
         types:
             - AzureTableStorage
     BlockchainWalletsConnString:
-        settings-key: ChainalysisHistoryExporterJob-BilBlockchainWalletsAzureConnString
+        settings-key: BilBlockchainWalletsConnString
         types:
             - AzureTableStorage
     ClientPersonalInfoConnString:
@@ -78,20 +78,20 @@ Btc:
     Network:
         settings-key: ChainalysisHistoryExporterJob-BtcNetwork
     NinjaUrl:
-        settings-key: ChainalysisHistoryExporterJob-BtcNinjaUrl
+        settings-key: NinjaServiceUrl
 Eth:
     SamuraiUrl:
-        settings-key: ChainalysisHistoryExporterJob-EthSamuraiUrl
+        settings-key: EthSamuraiUrl
 Ltc:
     Network:
         settings-key: ChainalysisHistoryExporterJob-LtcNetwork
     InsightApiUrl:
-        settings-key: ChainalysisHistoryExporterJob-LtcInsightApiUrl
+        settings-key: LtcInsightApiUrl
 Bch:
     Network:
         settings-key: ChainalysisHistoryExporterJob-BchNetwork
     InsightApiUrl:
-        settings-key: ChainalysisHistoryExporterJob-BchInsightApiUrl
+        settings-key: BchInsightApiUrl
 Assets:
     ServiceUrl:
         settings-key: AssetsServiceUrl
