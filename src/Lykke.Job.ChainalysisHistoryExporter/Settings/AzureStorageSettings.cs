@@ -25,6 +25,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
         [AzureTableCheck]
         public string ClientPersonalInfoConnString { get; set; }
         
+        [Optional]
         public string BlockchainWalletsTable { get; set; } = "BlockchainWallets";
     }
 }
