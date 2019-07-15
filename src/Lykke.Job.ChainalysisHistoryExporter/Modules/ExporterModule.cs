@@ -47,7 +47,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
                 .AsSelf()
                 .SingleInstance();
             
-            builder.RegisterType<BlockchainsProvider>().AsSelf().SingleInstance();
+            builder.RegisterType<BlockchainsProvider>().As<IBlockchainsProvider>().SingleInstance();
             builder.RegisterType<AddressNormalizer>().AsSelf().SingleInstance();
             builder.RegisterType<WithdrawalsExporter>().AsSelf();
             builder.RegisterType<DepositsExporter>().AsSelf();

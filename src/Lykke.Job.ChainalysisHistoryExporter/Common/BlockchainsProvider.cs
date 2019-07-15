@@ -4,7 +4,7 @@ using Lykke.Job.ChainalysisHistoryExporter.Assets;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Common
 {
-    public class BlockchainsProvider
+    public class BlockchainsProvider : IBlockchainsProvider
     {
         private readonly AssetsClient _assetsClient;
         private readonly Dictionary<string, Blockchain> _byBillId;

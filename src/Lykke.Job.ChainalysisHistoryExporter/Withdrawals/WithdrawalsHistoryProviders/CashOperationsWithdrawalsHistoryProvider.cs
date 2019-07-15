@@ -43,11 +43,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalsHistoryPro
 
         #endregion
 
-        private readonly BlockchainsProvider _blockchainsProvider;
+        private readonly IBlockchainsProvider _blockchainsProvider;
         private readonly CloudTable _table;
 
         public CashOperationsWithdrawalsHistoryProvider(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             AzureStorageSettings azureStorageSettings)
         {
             _blockchainsProvider = blockchainsProvider;

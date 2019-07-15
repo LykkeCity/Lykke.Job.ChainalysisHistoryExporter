@@ -67,11 +67,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
             public int Skip { get; set; }
         }
 
-        private readonly BlockchainsProvider _blockchainsProvider;
+        private readonly IBlockchainsProvider _blockchainsProvider;
         private readonly IMongoCollection<WalletMongoEntity> _collection;
 
         public BilMongoDepositWalletsProvider(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             MongoStorageSettings settings)
         {
             _blockchainsProvider = blockchainsProvider;
