@@ -17,7 +17,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
         private readonly Blockchain _bitcoin;
 
         public BtcDepositsHistoryProvider(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             BtcSettings settings)
         {
             _bitcoin = blockchainsProvider.GetBitcoin();

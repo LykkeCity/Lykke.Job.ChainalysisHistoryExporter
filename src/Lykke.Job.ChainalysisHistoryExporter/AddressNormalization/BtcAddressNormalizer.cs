@@ -11,7 +11,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
         private readonly Network _network;
 
         public BtcAddressNormalizer(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             BtcSettings settings)
         {
             _bitcoin = blockchainsProvider.GetBitcoin();

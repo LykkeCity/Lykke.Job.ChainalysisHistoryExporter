@@ -14,7 +14,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
 
         private readonly Blockchain _ethereum;
 
-        public EthAddressNormalizer(BlockchainsProvider blockchainsProvider)
+        public EthAddressNormalizer(IBlockchainsProvider blockchainsProvider)
         {
             _ethereum = blockchainsProvider.GetEthereum();
         }

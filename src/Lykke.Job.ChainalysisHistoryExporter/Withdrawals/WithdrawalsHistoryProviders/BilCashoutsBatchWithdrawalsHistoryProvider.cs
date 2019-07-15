@@ -65,7 +65,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalsHistoryPro
         #endregion
 
         private readonly ILog _log;
-        private readonly BlockchainsProvider _blockchainsProvider;
+        private readonly IBlockchainsProvider _blockchainsProvider;
         private readonly CloudTable _cashoutBatchesTable;
         private readonly CloudTable _operationExecutionsTable;
         private IReadOnlyDictionary<Guid, OperationExecutionEntity> _operationExecutions;
@@ -73,7 +73,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals.WithdrawalsHistoryPro
 
         public BilCashoutsBatchWithdrawalsHistoryProvider(
             ILogFactory logFactory,
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             AzureStorageSettings azureStorageSettings)
         {
             _log = logFactory.CreateLog(this);

@@ -11,7 +11,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
         private readonly Network _network;
 
         public LtcAddressNormalizer(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             LtcSettings settings)
         {
             _liteCoin = blockchainsProvider.GetLiteCoin();

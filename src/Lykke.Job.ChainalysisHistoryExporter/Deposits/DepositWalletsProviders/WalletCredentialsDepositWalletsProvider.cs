@@ -38,11 +38,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositWalletsProviders
 
         #endregion
 
-        private readonly BlockchainsProvider _blockchainsProvider;
+        private readonly IBlockchainsProvider _blockchainsProvider;
         private readonly CloudTable _table;
 
         public WalletCredentialsDepositWalletsProvider(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             AzureStorageSettings azureStorageSettings)
         {
             _blockchainsProvider = blockchainsProvider;

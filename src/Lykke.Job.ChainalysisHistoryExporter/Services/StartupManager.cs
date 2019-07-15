@@ -5,6 +5,7 @@ using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.Jobs;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Lykke.Sdk;
+using NBitcoin.Altcoins;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Services
 {
@@ -24,6 +25,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Services
 
         public Task StartAsync()
         {
+            _log.Info("Ensuring BitcoinCash is registered...");
+
+            BCash.Instance.EnsureRegistered();
+
+            _log.Info("Ensuring LiteCoin is registered...");
+
+            Litecoin.Instance.EnsureRegistered();
+
             _log.Info($"Registering {nameof(ExportHistoryJob)} as recurring job '{ExportHistoryJob.Id}' with CRON '{_scheduleSettings.ExportHistoryCron}'...");
 
             RecurringJob.AddOrUpdate<ExportHistoryJob>

@@ -31,7 +31,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
         public LtcDepositsHistoryProvider(
             ILogFactory logFactory,
             LtcSettings settings,
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             AddressNormalizer addressNormalizer)
         {
             _log = logFactory.CreateLog(this);

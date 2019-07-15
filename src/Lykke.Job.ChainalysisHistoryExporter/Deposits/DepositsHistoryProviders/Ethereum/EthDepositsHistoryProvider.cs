@@ -16,7 +16,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
         private readonly AddressNormalizer _addressNormalizer;
 
         public EthDepositsHistoryProvider(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             EthSettings settings,
             AddressNormalizer addressNormalizer)
         {

@@ -22,7 +22,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
     public class DepositsHistoryProvidersTests
     {
         private AddressNormalizer _addressNormalizer;
-        private BlockchainsProvider _blockchainProvider;
+        private IBlockchainsProvider _blockchainProvider;
         private ILogFactory _logFactory;
 
         [SetUp]

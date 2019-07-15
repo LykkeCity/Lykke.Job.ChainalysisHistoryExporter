@@ -13,7 +13,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
         private readonly Network _bchNetwork;
 
         public BchAddressNormalizer(
-            BlockchainsProvider blockchainsProvider,
+            IBlockchainsProvider blockchainsProvider,
             BchSettings settings)
         {
             _bitcoinCash = blockchainsProvider.GetBitcoinCash();
