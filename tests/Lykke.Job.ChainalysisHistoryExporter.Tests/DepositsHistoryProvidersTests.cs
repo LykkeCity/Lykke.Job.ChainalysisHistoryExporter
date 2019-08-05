@@ -224,6 +224,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
         }
 
         [Test]
+        [Ignore("Mainnet Samurai is not accessible")]
         public async Task TestEthDepositsHistoryForErc20()
         {
             // Arrange
@@ -265,6 +266,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
         }
 
         [Test]
+        [Ignore("Mainnet Samurai is not accessible")]
         public async Task TestEthDepositsHistoryForEther()
         {
             // Arrange
