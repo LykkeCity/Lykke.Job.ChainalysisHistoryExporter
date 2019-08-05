@@ -30,7 +30,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Services
             _log = logFactory.CreateLog(this);
         }
 
-        public Task StartAsync()
+        public async Task StartAsync()
         {
             _log.Info("Ensuring BitcoinCash is registered...");
 
@@ -49,16 +49,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Services
                 cronExpression: _scheduleSettings.ExportHistoryCron
             );
             
-            RunExportJobIfWasMissed();
-
-            return Task.CompletedTask;
+            await RunExportJobIfWasMissedAsync();
         }
 
-        private void RunExportJobIfWasMissed()
+        private async Task RunExportJobIfWasMissedAsync()
         {
             var scheduleCron = CronExpression.Parse(_scheduleSettings.ExportHistoryCron);
 
-            var lastOccurrence = _transactionsSnapshotRepository.GetLastModified()?.UtcDateTime;
+            var lastOccurrence = (await _transactionsSnapshotRepository.GetLastModifiedAsync())?.UtcDateTime;
             var now = DateTime.UtcNow;
 
             _log.Info($"Last report occurence is [{lastOccurrence:s}]");
