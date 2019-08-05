@@ -37,6 +37,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
             _blob = blobContainer.GetBlockBlobReference("full-report.csv");
         }
 
+        public DateTimeOffset? GetLastModified()
+        {
+            return _blob.Properties.LastModified;
+        }
+
         public async Task<(HashSet<Transaction> Snapshot, DateTimeOffset? LastModified)> LoadAsync()
         {
             _log.Info("Loading transactions snapshot...");
