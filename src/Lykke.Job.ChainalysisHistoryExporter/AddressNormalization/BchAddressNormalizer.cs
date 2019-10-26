@@ -33,21 +33,21 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
             var legacyAddress = GetBitcoinAddress(address, _btcNetwork);
             if (legacyAddress != null)
             {
-                return legacyAddress.ScriptPubKey.GetDestinationAddress(_bchNetwork).ToString();
+                return RemoveAddressPrefix(legacyAddress.ScriptPubKey.GetDestinationAddress(_bchNetwork).ToString());
             }
 
             // eg: bitcoincash:qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a
             var canonicalAddress = GetBitcoinAddress(address, _bchNetwork);
             if (canonicalAddress != null)
             {
-                return canonicalAddress.ToString();
+                return RemoveAddressPrefix(canonicalAddress.ToString());
             }
             
             // eg: qpm2qsznhks23z7629mms6s4cwef74vcwvy22gdx6a
             // ReSharper restore CommentTypo
             var addressWithoutPrefix = GetBitcoinAddress($"{GetAddressPrefix(_bchNetwork)}:{address}", _bchNetwork);
 
-            return addressWithoutPrefix?.ToString();
+            return RemoveAddressPrefix(addressWithoutPrefix?.ToString());
         }
 
         private static BitcoinAddress GetBitcoinAddress(string address, Network network)
@@ -60,6 +60,24 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
             {
                 return null;
             }
+        }
+
+        private static string RemoveAddressPrefix(string address)
+        {
+            if (address == null)
+            {
+                return null;
+            }
+
+            var colonIndex = address.IndexOf(':');
+
+            if (colonIndex == -1 || colonIndex == address.Length - 1)
+            {
+                return address;
+            }
+
+
+            return address.Substring(colonIndex + 1);
         }
 
         private static string GetAddressPrefix(Network bchNetwork)
