@@ -8,7 +8,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
     public class TransactionsReportBuilder
     {
         private readonly TransactionsSnapshotRepository _snapshotRepository;
-        private readonly IReadOnlyCollection<ITransactionsIncrementRepository> _incrementRepositories;
+        private readonly IReadOnlyCollection<ITransactionsIncrementPublisher> _incrementRepositories;
         private readonly HashSet<Transaction> _increment;
         private HashSet<Transaction> _snapshot;
         private bool _incrementSaved;
@@ -16,7 +16,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
 
         public TransactionsReportBuilder(
             TransactionsSnapshotRepository snapshotRepository,
-            IReadOnlyCollection<ITransactionsIncrementRepository> incrementRepositories)
+            IReadOnlyCollection<ITransactionsIncrementPublisher> incrementRepositories)
         {
             _snapshotRepository = snapshotRepository;
             _incrementRepositories = incrementRepositories;
@@ -77,7 +77,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting
             var incrementFrom = _snapshotModifiedAt?.UtcDateTime ?? utcNow;
             var incrementTo = utcNow;
 
-            var tasks = _incrementRepositories.Select(incrementRepository => incrementRepository.SaveAsync(_increment, incrementFrom, incrementTo));
+            var tasks = _incrementRepositories.Select(incrementRepository => incrementRepository.Publish(_increment, incrementFrom, incrementTo));
 
             await Task.WhenAll(tasks);
         }

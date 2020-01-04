@@ -4,6 +4,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
 {
     public class AppSettings : BaseAppSettings
     {
+        public EmailSettings Email { get; set; }
         public AzureStorageSettings AzureStorage { get; set; }
         public MongoStorageSettings MongoStorage { get; set; }
         public DepositWalletsProvidersSettings DepositWalletsProviders { get; set; }

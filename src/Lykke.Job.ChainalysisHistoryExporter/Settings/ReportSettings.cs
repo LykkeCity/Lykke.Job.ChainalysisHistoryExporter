@@ -4,6 +4,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
 {
     public class ReportSettings
     {
-        public IReadOnlyCollection<string> Repositories { get; set; }
+        public IReadOnlyCollection<string> Publishers { get; set; }
     }
 }
