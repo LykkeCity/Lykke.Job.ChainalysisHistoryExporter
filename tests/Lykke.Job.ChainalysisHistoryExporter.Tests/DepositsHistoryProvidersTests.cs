@@ -181,6 +181,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
         }
 
         [Test]
+        [Ignore("Public Insight API doesn't work")]
         public async Task TestBchDepositsHistory()
         {
             // Arrange
