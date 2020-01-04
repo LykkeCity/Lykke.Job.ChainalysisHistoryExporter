@@ -34,6 +34,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             });
         }
 
+        [Ignore("Public Insight API doesn't work")]
         [Test]
         [TestCase("qp3wjpa3tjlj042z2wv7hahsldgwhwy0rq9sywjpyy", ExpectedResult = "qp3wjpa3tjlj042z2wv7hahsldgwhwy0rq9sywjpyy")]
         [TestCase("bitcoincash:qp3wjpa3tjlj042z2wv7hahsldgwhwy0rq9sywjpyy", ExpectedResult = "qp3wjpa3tjlj042z2wv7hahsldgwhwy0rq9sywjpyy")]
