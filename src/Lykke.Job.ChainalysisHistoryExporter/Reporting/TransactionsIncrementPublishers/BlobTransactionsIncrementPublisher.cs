@@ -8,15 +8,15 @@ using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementRepositories
+namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementPublishers
 {
-    public class BlobTransactionsIncrementRepository : ITransactionsIncrementRepository
+    public class BlobTransactionsIncrementPublisher : ITransactionsIncrementPublisher
     {
         private readonly ILog _log;
         private readonly TransactionsReportWriter _writer;
         private readonly CloudBlobContainer _blobContainer;
 
-        public BlobTransactionsIncrementRepository(
+        public BlobTransactionsIncrementPublisher(
             ILogFactory logFactory,
             AzureStorageSettings settings,
             TransactionsReportWriter writer)
@@ -33,7 +33,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementRe
             _blobContainer.CreateIfNotExistsAsync().GetAwaiter().GetResult();
         }
 
-        public async Task SaveAsync(HashSet<Transaction> increment, DateTime incrementFrom, DateTime incrementTo)
+        public async Task Publish(HashSet<Transaction> increment, DateTime incrementFrom, DateTime incrementTo)
         {
             var blobName = $"increment-from-{incrementFrom:s}.csv";
 

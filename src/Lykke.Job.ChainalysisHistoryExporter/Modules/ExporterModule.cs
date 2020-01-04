@@ -26,6 +26,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
             builder.RegisterInstance(_settings.AzureStorage);
             builder.RegisterInstance(_settings.MongoStorage);
             builder.RegisterInstance(_settings.Slack);
+            builder.RegisterInstance(_settings.Email);
             builder.RegisterInstance(_settings.Btc);
             builder.RegisterInstance(_settings.Eth);
             builder.RegisterInstance(_settings.Ltc);
@@ -40,7 +41,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
             builder.RegisterType<TransactionsReportWriter>().AsSelf();
             builder.RegisterType<TransactionsSnapshotRepository>().AsSelf();
 
-            RegisterImplementations<ITransactionsIncrementRepository>(builder, _settings.Report.Repositories);
+            RegisterImplementations<ITransactionsIncrementPublisher>(builder, _settings.Report.Publishers);
 
             builder.RegisterType<AssetsClient>()
                 .WithParameter(TypedParameter.From(_settings.Assets))

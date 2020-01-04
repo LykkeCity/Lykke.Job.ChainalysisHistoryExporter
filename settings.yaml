@@ -66,9 +66,34 @@ Slack:
         settings-key: ChainalysisHistoryExporterJob-SlackReportAuthKey
         types:
             - Optional
+Email:
+    SmtpHost:
+        settings-key: ChainalysisHistoryExporterJob-EmailSmtpHost
+    Port:
+        settings-key: ChainalysisHistoryExporterJob-EmailPort
+        types:
+            - Optional
+    EnableSsl:
+        settings-key: ChainalysisHistoryExporterJob-EmailEnableSsl
+    UserName:
+        settings-key: ChainalysisHistoryExporterJob-EmailUserName
+    Password:
+        settings-key: ChainalysisHistoryExporterJob-EmailPassword
+    FromDisplayName:
+        settings-key: ChainalysisHistoryExporterJob-EmailFromDisplayName
+    FromEmailAddress:
+        settings-key: ChainalysisHistoryExporterJob-EmailFromEmailAddress
+    To:
+        settings-key: ChainalysisHistoryExporterJob-EmailTo
+        types:
+            - JsonArray
+    Bcc:
+        settings-key: ChainalysisHistoryExporterJob-EmailBcc
+        types:
+            - JsonArray
 Report:
-    Repositories:
-        settings-key: ChainalysisHistoryExporterJob-ReportRepositories
+    Publishers:
+        settings-key: ChainalysisHistoryExporterJob-ReportPublishers
         types:
             - JsonArray
 Schedule:

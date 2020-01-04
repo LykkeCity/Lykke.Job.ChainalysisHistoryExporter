@@ -7,17 +7,16 @@ using Lykke.Common.Log;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using SlackAPI;
 
-namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementRepositories
+namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementPublishers
 {
-    public class SlackTransactionsIncrementRepository : ITransactionsIncrementRepository
+    public class SlackTransactionsIncrementPublisher : ITransactionsIncrementPublisher
     {
         private readonly ILog _log;
         private readonly TransactionsReportWriter _writer;
         private readonly SlackSettings _settings;
         private readonly SlackTaskClient _client;
-
-
-        public SlackTransactionsIncrementRepository(
+        
+        public SlackTransactionsIncrementPublisher(
             ILogFactory logFactory,
             TransactionsReportWriter writer,
             SlackSettings settings)
@@ -28,7 +27,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementRe
             _client = new SlackTaskClient(settings.AuthToken);
         }
 
-        public async Task SaveAsync(HashSet<Transaction> increment, DateTime incrementFrom, DateTime incrementTo)
+        public async Task Publish(HashSet<Transaction> increment, DateTime incrementFrom, DateTime incrementTo)
         {
             var fileName = $"transactions-{incrementTo:s}.csv";
 
