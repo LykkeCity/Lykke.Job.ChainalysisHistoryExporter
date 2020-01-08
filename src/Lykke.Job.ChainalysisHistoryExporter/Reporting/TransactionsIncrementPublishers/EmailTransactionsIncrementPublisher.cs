@@ -30,8 +30,9 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementPu
         {
             var fileName = $"transactions-{incrementTo:s}.csv";
             var destinations = string.Join(", ", _settings.To);
+            var bccDestinations = string.Join(", ", _settings.Bcc);
 
-            _log.Info($"Sending transactions increment '{fileName}' via email to addresses '{destinations}'...");
+            _log.Info($"Sending transactions increment '{fileName}' via email to addresses '{destinations}' and BCC '{bccDestinations}'...");
 
             using (var stream = new MemoryStream())
             {
