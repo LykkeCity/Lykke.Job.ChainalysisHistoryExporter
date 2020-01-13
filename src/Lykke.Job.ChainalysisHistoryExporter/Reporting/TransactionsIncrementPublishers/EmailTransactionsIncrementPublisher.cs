@@ -53,11 +53,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Reporting.TransactionsIncrementPu
                     message.Bcc.Add(new MailboxAddress(bcc));
                 }
                 
-                message.Subject =  $"Lykke transactions report for the period {incrementFrom:s} - {incrementTo:s}";
+                message.Subject =  $"Lykke transactions batch for the period {incrementFrom:s} - {incrementTo:s}";
 
                 var text = new TextPart("plain")
                 {
-                    Text = @"Hi, please find enclosed the transactions batch from last week, best regards"
+                    Text = $@"Hi, please find enclosed the transactions batch for the period {incrementFrom:s} - {incrementTo:s} UTC, best regards"
                 };
 
                 var report = new MimePart("text", "csv")
