@@ -8,6 +8,8 @@ using Lykke.Job.ChainalysisHistoryExporter.Deposits;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Lykke.Job.ChainalysisHistoryExporter.Withdrawals;
+using Lykke.Logs;
+using Lykke.Service.EmailSender;
 using Lykke.SettingsReader;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Modules
@@ -23,10 +25,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterInstance(_settings.Email);
             builder.RegisterInstance(_settings.AzureStorage);
             builder.RegisterInstance(_settings.MongoStorage);
             builder.RegisterInstance(_settings.Slack);
-            builder.RegisterInstance(_settings.Email);
             builder.RegisterInstance(_settings.Btc);
             builder.RegisterInstance(_settings.Eth);
             builder.RegisterInstance(_settings.Ltc);
@@ -47,12 +49,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
                 .WithParameter(TypedParameter.From(_settings.Assets))
                 .AsSelf()
                 .SingleInstance();
-            
+
+            builder.RegisterEmailSenderService(_settings.Email.EmailSenderServiceUrl, EmptyLogFactory.Instance.CreateLog(this));
+
             builder.RegisterType<BlockchainsProvider>().As<IBlockchainsProvider>().SingleInstance();
             builder.RegisterType<AddressNormalizer>().AsSelf().SingleInstance();
             builder.RegisterType<WithdrawalsExporter>().AsSelf();
             builder.RegisterType<DepositsExporter>().AsSelf();
-            
+
             builder.RegisterType<GeneralAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<BtcAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<BchAddressNormalizer>().As<IAddressNormalizer>();
