@@ -44,6 +44,7 @@ namespace InvalidAddressRemover
                     new BchAddressNormalizer(blockchainProvider, new BchSettings {Network = "mainnet"}),
                     new LtcAddressNormalizer(blockchainProvider, new LtcSettings {Network = "ltc-main"}),
                     new EthAddressNormalizer(blockchainProvider),
+                    new XrpAddressNormalizer(blockchainProvider)
                 }
             );
             var reportReader = new TransactionsReportReader(addressNormalizer);

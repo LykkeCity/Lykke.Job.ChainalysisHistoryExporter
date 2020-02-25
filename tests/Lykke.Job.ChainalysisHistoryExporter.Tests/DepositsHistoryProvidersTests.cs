@@ -10,6 +10,7 @@ using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Bit
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.BitcoinCash;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ethereum;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.LiteCoin;
+using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ripple;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Lykke.Logs;
@@ -44,6 +45,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                     new BchAddressNormalizer(_blockchainProvider, new BchSettings {Network = "mainnet"}),
                     new LtcAddressNormalizer(_blockchainProvider, new LtcSettings {Network = "ltc-main"}),
                     new EthAddressNormalizer(_blockchainProvider),
+                    new XrpAddressNormalizer(_blockchainProvider)
                 }
             );
         }
@@ -64,7 +66,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                 _blockchainProvider,
                 new BtcSettings
                 {
-                    Network = "main", 
+                    Network = "main",
                     NinjaUrl = "http://api.qbit.ninja"
                 }
             );
@@ -129,7 +131,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                 _logFactory,
                 new LtcSettings
                 {
-                    Network = "ltc-main", 
+                    Network = "ltc-main",
                     InsightApiUrl = "https://insight.litecore.io/api"
                 },
                 _blockchainProvider,
@@ -191,7 +193,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                 _logFactory,
                 new BchSettings
                 {
-                    Network = "main", 
+                    Network = "main",
                     InsightApiUrl = "https://blockdozer.com/insight-api"
                 },
                 _blockchainProvider,
@@ -338,6 +340,95 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             Assert.AreEqual(wallet.Address, inputTransaction5.OutputAddress);
             Assert.AreEqual(wallet.UserId, inputTransaction5.UserId);
             Assert.AreEqual(TransactionType.Deposit, inputTransaction5.Type);
+        }
+
+        [Test]
+        public async Task TestXrpDepositsHistoryWithTag()
+        {
+            // Arrange
+
+            var historyProvider = new XrpDepositsHistoryProvider
+            (
+                _blockchainProvider,
+                new XrpSettings
+                {
+                    RpcUrl = "http://s.altnet.rippletest.net:51234"
+                }
+            );
+            
+            var wallet = new DepositWallet
+            (
+                Guid.NewGuid(),
+                _addressNormalizer.NormalizeOrDefault("rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2+1188615693", "XRP"),
+                "XRP"
+            );
+
+            // Act
+
+            var transactions = await historyProvider.GetHistoryAsync(wallet, null);
+
+            var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "2ECB3C49152C3E95CB11BCCE59FDEA96200696B9B529E13891DDC3F115EF55AB");
+            var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "8812C6CAFBE7C37C449D0C64673371BEAE26500276648FE6634BE87FCA9AFDF9");
+            var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "B5E4D68E8F0C9C440BF1C4040CB303546A0534EE173AB372B3F149ADCA59AB0D");
+
+
+            // Assert
+
+            Assert.IsNotNull(inputTransaction1);
+            Assert.IsNull(inputTransaction2);
+            Assert.IsNull(outputTransaction1);
+
+            Assert.AreEqual("XRP", inputTransaction1.CryptoCurrency);
+            Assert.AreEqual(wallet.Address, inputTransaction1.OutputAddress);
+            Assert.AreEqual(wallet.UserId, inputTransaction1.UserId);
+            Assert.AreEqual(TransactionType.Deposit, inputTransaction1.Type);
+        }
+
+        [Test]
+        public async Task TestXrpDepositsHistoryWithoutTag()
+        {
+            // Arrange
+
+            var historyProvider = new XrpDepositsHistoryProvider
+            (
+                _blockchainProvider,
+                new XrpSettings
+                {
+                    RpcUrl = "http://s.altnet.rippletest.net:51234"
+                }
+            );
+
+            var wallet = new DepositWallet
+            (
+                Guid.NewGuid(),
+                _addressNormalizer.NormalizeOrDefault("rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2", "XRP"),
+                "XRP"
+            );
+
+            // Act
+
+            var transactions = await historyProvider.GetHistoryAsync(wallet, null);
+
+            var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "2ECB3C49152C3E95CB11BCCE59FDEA96200696B9B529E13891DDC3F115EF55AB");
+            var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "8812C6CAFBE7C37C449D0C64673371BEAE26500276648FE6634BE87FCA9AFDF9");
+            var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "B5E4D68E8F0C9C440BF1C4040CB303546A0534EE173AB372B3F149ADCA59AB0D");
+
+
+            // Assert
+
+            Assert.IsNotNull(inputTransaction1);
+            Assert.IsNotNull(inputTransaction2);
+            Assert.IsNull(outputTransaction1);
+
+            Assert.AreEqual("XRP", inputTransaction1.CryptoCurrency);
+            Assert.AreEqual(wallet.Address, inputTransaction1.OutputAddress);
+            Assert.AreEqual(wallet.UserId, inputTransaction1.UserId);
+            Assert.AreEqual(TransactionType.Deposit, inputTransaction1.Type);
+
+            Assert.AreEqual("XRP", inputTransaction2.CryptoCurrency);
+            Assert.AreEqual(wallet.Address, inputTransaction2.OutputAddress);
+            Assert.AreEqual(wallet.UserId, inputTransaction2.UserId);
+            Assert.AreEqual(TransactionType.Deposit, inputTransaction2.Type);
         }
     }
 }

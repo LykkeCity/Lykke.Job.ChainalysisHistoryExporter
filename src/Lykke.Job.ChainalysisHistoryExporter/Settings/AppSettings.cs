@@ -18,5 +18,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
         public EthSettings Eth { get; set; }
         public LtcSettings Ltc { get; set; }
         public BchSettings Bch { get; set; }
+        public XrpSettings Xrp { get; set; }
     }
 }
