@@ -379,7 +379,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             Assert.IsNull(outputTransaction1);
 
             Assert.AreEqual("XRP", inputTransaction1.CryptoCurrency);
-            Assert.AreEqual(wallet.Address, inputTransaction1.OutputAddress);
+            Assert.IsTrue(wallet.Address.StartsWith(inputTransaction1.OutputAddress));
             Assert.AreEqual(wallet.UserId, inputTransaction1.UserId);
             Assert.AreEqual(TransactionType.Deposit, inputTransaction1.Type);
         }

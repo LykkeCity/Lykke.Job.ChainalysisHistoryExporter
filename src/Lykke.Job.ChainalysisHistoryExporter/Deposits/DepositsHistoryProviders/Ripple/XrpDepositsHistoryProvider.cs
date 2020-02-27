@@ -59,9 +59,17 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
                     throw new InvalidOperationException($"XRP request error: {response.Result.Error}");
                 }
 
+
                 transactions.AddRange
                 (
-                    response.Result.Transactions.Where(tx => IsDeposit(tx, address, tag)).Select(tx => Map(tx, depositWallet))
+                    response.Result.Transactions
+                        // filter transaction by destination tag
+                        // to find deposits of specified user
+                        .Where(tx => IsDeposit(tx, address, tag))
+                        // but consumer interested in real blockchain address only,
+                        // so instead of deposit wallet address in form "{address}+{tag}"
+                        // return just Ripple address without tag
+                        .Select(tx => Map(tx.Tx.Hash, depositWallet.UserId, address))
                 );
 
                 pagingMarker = response.Result.Marker;
@@ -86,9 +94,9 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
                 (tag == null || tx.Tx.DestinationTag?.ToString("D") == tag);
         }
 
-        private Transaction Map(RippleTransaction tx, DepositWallet wallet)
+        private Transaction Map(string hash, Guid userId, string address)
         {
-            return new Transaction(wallet.CryptoCurrency, tx.Tx.Hash, wallet.UserId, wallet.Address, TransactionType.Deposit);
+            return new Transaction(_ripple.CryptoCurrency, hash, userId, address, TransactionType.Deposit);
         }
     }
 }
