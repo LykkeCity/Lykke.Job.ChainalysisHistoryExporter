@@ -7,6 +7,7 @@
         Blockchain GetEthereum();
         Blockchain GetLiteCoin();
         Blockchain GetBitcoinCash();
+        Blockchain GetRipple();
         Blockchain GetByAssetIdOrDefault(string assetId);
         Blockchain GuessBlockchainOrDefault(string assetReference);
     }

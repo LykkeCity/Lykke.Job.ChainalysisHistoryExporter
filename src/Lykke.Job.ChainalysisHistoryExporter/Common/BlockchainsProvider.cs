@@ -20,7 +20,8 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Common
                 new Blockchain {CryptoCurrency = "BTC", BilId = "Bitcoin"},
                 new Blockchain {CryptoCurrency = "ETH", BilId = "Ethereum", AssetBlockchain = "Ethereum", AssetReferences = new [] { "ERC20", "ERC223" }},
                 new Blockchain {CryptoCurrency = "LTC", BilId = "LiteCoin"},
-                new Blockchain {CryptoCurrency = "BCH", BilId = "BitcoinCash"}
+                new Blockchain {CryptoCurrency = "BCH", BilId = "BitcoinCash"},
+                new Blockchain {CryptoCurrency = "XRP", BilId = "Ripple"}
             };
 
             _byBillId = blockchains.ToDictionary(x => x.BilId);
@@ -56,6 +57,11 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Common
         public Blockchain GetBitcoinCash()
         {
             return GetByBilIdOrDefault("BitcoinCash");
+        }
+
+        public Blockchain GetRipple()
+        {
+            return GetByBilIdOrDefault("Ripple");
         }
 
         public Blockchain GetByAssetIdOrDefault(string assetId)

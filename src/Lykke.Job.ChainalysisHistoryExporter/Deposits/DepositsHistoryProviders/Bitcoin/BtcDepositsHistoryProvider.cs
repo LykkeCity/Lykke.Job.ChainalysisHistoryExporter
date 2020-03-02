@@ -43,7 +43,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
             return PaginatedList.From(response.Continuation, depositTransactions.ToArray());
         }
 
-        private IEnumerable<Transaction> Map(IEnumerable<BalanceOperation> source, 
+        private IEnumerable<Transaction> Map(IEnumerable<BalanceOperation> source,
             string outputAddress,
             Guid userId)
         {

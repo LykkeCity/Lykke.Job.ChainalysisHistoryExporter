@@ -101,6 +101,11 @@ Bch:
         settings-key: ChainalysisHistoryExporterJob-BchNetwork
     InsightApiUrl:
         settings-key: BchInsightApiUrl
+Xrp:
+    RpcUrl:
+        settings-key: XrpRpcUrl
+    CacheExpirationPeriod:
+        settings-key: ChainalysisHistoryExporterJob-XrpCacheExpirationPeriod
 Assets:
     ServiceUrl:
         settings-key: AssetsServiceUrl
