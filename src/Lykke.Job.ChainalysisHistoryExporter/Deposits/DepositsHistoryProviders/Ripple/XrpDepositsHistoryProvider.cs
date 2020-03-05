@@ -71,7 +71,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
 
             do
             {
-                var response = await _settings.RpcUrl
+                var request = new FlurlRequest(_settings.RpcUrl);
+
+                if (!string.IsNullOrEmpty(_settings.RpcUsername))
+                {
+                    request = request.WithBasicAuth(_settings.RpcUsername, _settings.RpcPassword);
+                }
+                    
+                var response = await request
                     .PostJsonAsync(new RippleAccountTransactionsRequest(address, marker: pagingMarker))
                     .ReceiveJson<RippleAccountTransactionsResponse>();
 

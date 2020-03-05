@@ -104,6 +104,10 @@ Bch:
 Xrp:
     RpcUrl:
         settings-key: XrpRpcUrl
+    RpcUsername:
+        settings-key: XrpRpcUsername
+    RpcPassword:
+        settings-key: XrpRpcPassword
     CacheExpirationPeriod:
         settings-key: ChainalysisHistoryExporterJob-XrpCacheExpirationPeriod
 Assets:
