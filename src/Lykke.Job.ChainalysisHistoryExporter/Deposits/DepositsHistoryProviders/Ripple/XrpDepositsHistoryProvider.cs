@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Flurl.Http;
+using Flurl.Http.Configuration;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
-using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ripple
 {
@@ -60,7 +62,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
             }
 
             return PaginatedList.From(
-                GetDeposits(txs, depositWallet.UserId, address, tag)
+                GetDeposits(txs, depositWallet, address, tag)
             );
         }
 
@@ -73,18 +75,23 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
             {
                 var request = new FlurlRequest(_settings.RpcUrl);
 
+                request.Settings.JsonSerializer = new NewtonsoftJsonSerializer(new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+
                 if (!string.IsNullOrEmpty(_settings.RpcUsername))
                 {
                     request = request.WithBasicAuth(_settings.RpcUsername, _settings.RpcPassword);
                 }
-                    
+
                 var response = await request
                     .PostJsonAsync(new RippleAccountTransactionsRequest(address, marker: pagingMarker))
                     .ReceiveJson<RippleAccountTransactionsResponse>();
 
                 if (!string.IsNullOrEmpty(response.Result.Error))
                 {
-                    throw new InvalidOperationException($"XRP request error: {response.Result.Error}");
+                    throw new InvalidOperationException($"XRP request error: {response.Result.ErrorMessage ?? response.Result.Error}");
                 }
 
                 txs.AddRange(response.Result.Transactions);
@@ -96,7 +103,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
             return txs;
         }
 
-        private List<Transaction> GetDeposits(IEnumerable<RippleTransaction> txs, Guid userId, string address, string tag)
+        private List<Transaction> GetDeposits(IEnumerable<RippleTransaction> txs, DepositWallet wallet, string address, string tag)
         {
             return txs
                 // filter transaction by destination tag
@@ -107,10 +114,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
                     tx.Tx.TransactionType == "Payment" &&
                     tx.Tx.Destination == address &&
                     (tag == null || tx.Tx.DestinationTag?.ToString("D") == tag))
-                // but consumer interested in real blockchain address only,
-                // so instead of deposit wallet address in form "{address}+{tag}"
-                // return just Ripple address without tag
-                .Select(tx => new Transaction(_ripple.CryptoCurrency, tx.Tx.Hash, userId, address, TransactionType.Deposit))
+                .Select(tx => new Transaction(wallet.CryptoCurrency, tx.Tx.Hash, wallet.UserId, wallet.Address, TransactionType.Deposit))
                 .ToList();
         }
     }

@@ -35,7 +35,10 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
                 return null;
             }
 
-            return address.Trim();
+            // consumer is interested in real blockchain address only,
+            // so instead of deposit wallet address in form "{address}+{tag}"
+            // return just Ripple address without tag
+            return adr;
         }
     }
 }

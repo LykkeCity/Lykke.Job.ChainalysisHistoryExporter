@@ -360,7 +360,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var wallet = new DepositWallet
             (
                 Guid.NewGuid(),
-                _addressNormalizer.NormalizeOrDefault("rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2+1188615693", "XRP"),
+                "rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2+1188615693",
                 "XRP"
             );
 
@@ -402,7 +402,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var wallet = new DepositWallet
             (
                 Guid.NewGuid(),
-                _addressNormalizer.NormalizeOrDefault("rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2", "XRP"),
+                "rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2",
                 "XRP"
             );
 

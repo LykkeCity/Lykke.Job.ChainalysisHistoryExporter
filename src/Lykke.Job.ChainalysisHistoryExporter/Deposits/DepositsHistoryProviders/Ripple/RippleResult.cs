@@ -13,5 +13,8 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
 
         [JsonProperty("error")]
         public string Error { get; set; }
+
+        [JsonProperty("error_message")]
+        public string ErrorMessage { get; set; }
     }
 }
