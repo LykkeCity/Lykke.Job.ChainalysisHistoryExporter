@@ -17,7 +17,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
             return _ripple.CryptoCurrency == cryptoCurrency;
         }
 
-        public string NormalizeOrDefault(string address)
+        public string NormalizeOrDefault(string address, bool isTransactionNormalization = false)
         {
             var addressParts = address.Split('+', StringSplitOptions.RemoveEmptyEntries);
             var adr = addressParts[0];
@@ -35,10 +35,13 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
                 return null;
             }
 
+            // finally, in transactions report,
             // consumer is interested in real blockchain address only,
             // so instead of deposit wallet address in form "{address}+{tag}"
             // return just Ripple address without tag
-            return adr;
+            return isTransactionNormalization
+                ? adr
+                : address;
         }
     }
 }

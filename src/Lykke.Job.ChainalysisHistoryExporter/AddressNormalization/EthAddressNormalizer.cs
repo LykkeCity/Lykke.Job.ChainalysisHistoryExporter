@@ -24,7 +24,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
             return _ethereum.CryptoCurrency == cryptoCurrency;
         }
 
-        public string NormalizeOrDefault(string address)
+        public string NormalizeOrDefault(string address, bool isTransactionNormalization = false)
         {
             return NormalizeOrDefaultInternal(address) ?? NormalizeOrDefaultInternal($"0x{address}");
         }

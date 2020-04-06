@@ -258,7 +258,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits
                 return null;
             }
 
-            var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency);
+            var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency, isTransactionNormalization: true);
             if (outputAddress == null)
             {
                 _log.Warning
