@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
         private readonly Blockchain _ripple;
         private readonly IMemoryCache _memoryCache;
         private readonly XrpSettings _settings;
+        private readonly ConcurrentDictionary<string, object> _mutex = new ConcurrentDictionary<string, object>();
 
         public XrpDepositsHistoryProvider(
             IBlockchainsProvider blockchainsProvider,
@@ -54,13 +56,21 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders
                 ? addressParts[1]
                 : null;
 
-            if (!_memoryCache.TryGetValue<List<RippleTransaction>>(address, out var txs))
+            List<RippleTransaction> txs;
+
+            if (!_memoryCache.TryGetValue<List<RippleTransaction>>(address, out txs))
             {
-                txs = await GetRippleTransactions(address);
+                lock (_mutex.GetOrAdd(address, new object()))
+                {
+                    if (!_memoryCache.TryGetValue<List<RippleTransaction>>(address, out txs))
+                    {
+                        txs = GetRippleTransactions(address).Result;
 
-                _memoryCache.Set(address, txs, _settings.CacheExpirationPeriod);
+                        _memoryCache.Set(address, txs, _settings.CacheExpirationPeriod);
+                    }
+                }
             }
-
+            
             return PaginatedList.From(
                 GetDeposits(txs, depositWallet, address, tag)
             );
