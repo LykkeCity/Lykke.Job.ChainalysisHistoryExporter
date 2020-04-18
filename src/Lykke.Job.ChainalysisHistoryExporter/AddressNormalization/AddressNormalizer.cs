@@ -22,13 +22,13 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
             });
         }
 
-        public string NormalizeOrDefault(string address, string cryptoCurrency)
+        public string NormalizeOrDefault(string address, string cryptoCurrency, bool isTransactionNormalization = false)
         {
             var currentAddress = address;
 
             foreach (var normalizer in _normalizers.Where(x => x.CanNormalize(cryptoCurrency)))
             {
-                currentAddress = normalizer.NormalizeOrDefault(currentAddress);
+                currentAddress = normalizer.NormalizeOrDefault(currentAddress, isTransactionNormalization);
 
                 if (currentAddress == null)
                 {

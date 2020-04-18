@@ -102,7 +102,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Withdrawals
                 return null;
             }
 
-            var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency);
+            var outputAddress = _addressNormalizer.NormalizeOrDefault(tx.OutputAddress, tx.CryptoCurrency, isTransactionNormalization: true);
             if (outputAddress == null)
             {
                 _log.Warning("It is not a valid address, skipping", context: new

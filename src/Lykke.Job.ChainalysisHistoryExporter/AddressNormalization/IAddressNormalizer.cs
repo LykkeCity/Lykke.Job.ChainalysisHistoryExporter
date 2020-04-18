@@ -4,6 +4,6 @@
     {
         bool CanNormalize(string cryptoCurrency);
 
-        string NormalizeOrDefault(string address);
+        string NormalizeOrDefault(string address, bool isTransactionNormalization = false);
     }
 }

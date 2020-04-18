@@ -26,7 +26,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
             return _bitcoinCash.CryptoCurrency == cryptoCurrency;
         }
 
-        public string NormalizeOrDefault(string address)
+        public string NormalizeOrDefault(string address, bool isTransactionNormalization = false)
         {
             // ReSharper disable CommentTypo
             // eg: moc231tgxApbRSwLNrc9ZbSVDktTRo3acK

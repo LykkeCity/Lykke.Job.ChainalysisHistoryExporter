@@ -9,7 +9,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.AddressNormalization
             return true;
         }
 
-        public string NormalizeOrDefault(string address)
+        public string NormalizeOrDefault(string address, bool isTransactionNormalization = false)
         {
             if (string.IsNullOrWhiteSpace(address))
             {
