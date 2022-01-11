@@ -243,14 +243,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                 _blockchainProvider,
                 new XrpSettings
                 {
-                    RpcUrl = "http://s.altnet.rippletest.net:51234"
+                    RpcUrl = "https://s1.ripple.com:51234/"
                 }
             );
 
             var wallet = new DepositWallet
             (
                 Guid.NewGuid(),
-                "rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2+1188615693",
+                "rLKKAHHiVoiFGcmaRkxXoD93J84ZUvDh4e+2092124714",
                 "XRP"
             );
 
@@ -258,7 +258,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
 
             var transactions = await historyProvider.GetHistoryAsync(wallet, null);
 
-            var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "2ECB3C49152C3E95CB11BCCE59FDEA96200696B9B529E13891DDC3F115EF55AB");
+            var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "BD209CEFCDF0ABA89FE8CC225E840EF7BB4407149B74B7AAB66F71C8B09D424F");
             var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "8812C6CAFBE7C37C449D0C64673371BEAE26500276648FE6634BE87FCA9AFDF9");
             var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "B5E4D68E8F0C9C440BF1C4040CB303546A0534EE173AB372B3F149ADCA59AB0D");
 
@@ -285,14 +285,14 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                 _blockchainProvider,
                 new XrpSettings
                 {
-                    RpcUrl = "http://s.altnet.rippletest.net:51234"
+                    RpcUrl = "https://s1.ripple.com:51234/"
                 }
             );
 
             var wallet = new DepositWallet
             (
                 Guid.NewGuid(),
-                "rBdTcycW4Q29RCojiQiQ3tAHNJiTsiqNu2",
+                "rLKKAHHiVoiFGcmaRkxXoD93J84ZUvDh4e",
                 "XRP"
             );
 
@@ -300,8 +300,8 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
 
             var transactions = await historyProvider.GetHistoryAsync(wallet, null);
 
-            var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "2ECB3C49152C3E95CB11BCCE59FDEA96200696B9B529E13891DDC3F115EF55AB");
-            var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "8812C6CAFBE7C37C449D0C64673371BEAE26500276648FE6634BE87FCA9AFDF9");
+            var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "73E4E8F9E70898C0D9F9AA7809E1885E5C91CA75F0A12DEB17EE5F6FAD4C0B60");
+            var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "6C00045F82B78C4B0A8BEA31E0EC4ADE3FE7FF9A3DEA637C7B38B213D0B587A9");
             var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "B5E4D68E8F0C9C440BF1C4040CB303546A0534EE173AB372B3F149ADCA59AB0D");
 
 
