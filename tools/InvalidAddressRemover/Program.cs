@@ -41,8 +41,6 @@ namespace InvalidAddressRemover
                 {
                     new GeneralAddressNormalizer(),
                     new BtcAddressNormalizer(blockchainProvider, new BtcSettings {Network = "mainnet"}),
-                    new BchAddressNormalizer(blockchainProvider, new BchSettings {Network = "mainnet"}),
-                    new LtcAddressNormalizer(blockchainProvider, new LtcSettings {Network = "ltc-main"}),
                     new EthAddressNormalizer(blockchainProvider),
                     new XrpAddressNormalizer(blockchainProvider)
                 }
