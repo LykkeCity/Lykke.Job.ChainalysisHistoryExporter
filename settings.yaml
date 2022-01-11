@@ -91,16 +91,6 @@ Btc:
 Eth:
     SamuraiUrl:
         settings-key: EthSamuraiUrl
-Ltc:
-    Network:
-        settings-key: ChainalysisHistoryExporterJob-LtcNetwork
-    InsightApiUrl:
-        settings-key: LtcInsightApiUrl
-Bch:
-    Network:
-        settings-key: ChainalysisHistoryExporterJob-BchNetwork
-    InsightApiUrl:
-        settings-key: BchInsightApiUrl
 Xrp:
     RpcUrl:
         settings-key: XrpRpcUrl

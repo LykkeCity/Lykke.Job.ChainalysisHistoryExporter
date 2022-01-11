@@ -7,15 +7,12 @@ using Lykke.Job.ChainalysisHistoryExporter.Assets;
 using Lykke.Job.ChainalysisHistoryExporter.Common;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Bitcoin;
-using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.BitcoinCash;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ethereum;
-using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.LiteCoin;
 using Lykke.Job.ChainalysisHistoryExporter.Deposits.DepositsHistoryProviders.Ripple;
 using Lykke.Job.ChainalysisHistoryExporter.Reporting;
 using Lykke.Job.ChainalysisHistoryExporter.Settings;
 using Lykke.Logs;
 using Lykke.Logs.Loggers.LykkeConsole;
-using Microsoft.Extensions.Caching.Memory;
 using NBitcoin.Altcoins;
 using NUnit.Framework;
 
@@ -43,8 +40,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                 {
                     new GeneralAddressNormalizer(),
                     new BtcAddressNormalizer(_blockchainProvider, new BtcSettings {Network = "mainnet"}),
-                    new BchAddressNormalizer(_blockchainProvider, new BchSettings {Network = "mainnet"}),
-                    new LtcAddressNormalizer(_blockchainProvider, new LtcSettings {Network = "ltc-main"}),
                     new EthAddressNormalizer(_blockchainProvider),
                     new XrpAddressNormalizer(_blockchainProvider)
                 }
@@ -93,7 +88,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var outputTransaction4 = transactions.Items.SingleOrDefault(x => x.Hash == "1363846a07e44774ebd9c29f5033894492273b96dca873aab63065064fe00c06");
             var outputTransaction5 = transactions.Items.SingleOrDefault(x => x.Hash == "12971723f3ebc31744693e7db4ba5fc9131c9b446c55a910ac7431b74bb91387");
             var outputTransaction6 = transactions.Items.SingleOrDefault(x => x.Hash == "cdf73195df0b8ec119153c80b29d05944117711ce7570d70e5bcd681522c9521");
-            
+
             // Assert
 
             Assert.IsNotNull(inputTransaction);
@@ -105,7 +100,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             Assert.IsNull(outputTransaction4);
             Assert.IsNull(outputTransaction5);
             Assert.IsNull(outputTransaction6);
-            
+
             Assert.AreEqual("BTC", inputTransaction.CryptoCurrency);
             Assert.AreEqual(wallet.Address, inputTransaction.OutputAddress);
             Assert.AreEqual(wallet.UserId, inputTransaction.UserId);
@@ -120,111 +115,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             Assert.AreEqual(wallet.Address, coloredInputTransaction2.OutputAddress);
             Assert.AreEqual(wallet.UserId, coloredInputTransaction2.UserId);
             Assert.AreEqual(TransactionType.Deposit, coloredInputTransaction2.Type);
-        }
-
-        [Test]
-        public async Task TestLtcDepositsHistory()
-        {
-            // Arrange
-
-            var historyProvider = new LtcDepositsHistoryProvider
-            (
-                _logFactory,
-                new LtcSettings
-                {
-                    Network = "ltc-main",
-                    InsightApiUrl = "https://insight.litecore.io/api"
-                },
-                _blockchainProvider,
-                _addressNormalizer
-            );
-            var wallet = new DepositWallet
-            (
-                Guid.NewGuid(),
-                _addressNormalizer.NormalizeOrDefault("MJ1yiB1YLQFra7teEnsYhHbCXtg7Z5cXER", "LTC"),
-                "LTC"
-            );
-
-            // Act
-
-            var transactions = await historyProvider.GetHistoryAsync(wallet, null);
-
-            Assert.IsNull(transactions.Continuation, "Test should be modified to support continuation");
-
-            var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "0d7b0f981c5c2eec3f3894684ac376d09d35316a0e2b92613aa8447e43267782");
-            var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "185dd76bdddbedd755fa3f1f8964900cc58091fc59b55eadc9182964e8bca4d0");
-            var inputTransaction3 = transactions.Items.SingleOrDefault(x => x.Hash == "03e525835881d46dcd57afab4cf1a0bbf4393dbe5ffb9d5b71ad22585cfeb1d5");
-            var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "ea56e88b637fc3a3eb51c74d7009c5c2d123ec45a646bf4bc18da4000c968739");
-            var outputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "736182ece2301dbf6201a8990a8c22f2984bc1e8e83cb8fddb58b0f9ff278397");
-            var outputTransaction3 = transactions.Items.SingleOrDefault(x => x.Hash == "23414816382e805390263fabe3eeafd708d4321d8b2084419f26b81020ec8367");
-
-            // Assert
-
-            Assert.IsNotNull(inputTransaction1);
-            Assert.IsNotNull(inputTransaction2);
-            Assert.IsNotNull(inputTransaction3);
-            Assert.IsNull(outputTransaction1);
-            Assert.IsNull(outputTransaction2);
-            Assert.IsNull(outputTransaction3);
-
-            Assert.AreEqual("LTC", inputTransaction1.CryptoCurrency);
-            Assert.AreEqual(wallet.Address, inputTransaction1.OutputAddress);
-            Assert.AreEqual(wallet.UserId, inputTransaction1.UserId);
-            Assert.AreEqual(TransactionType.Deposit, inputTransaction1.Type);
-
-            Assert.AreEqual("LTC", inputTransaction2.CryptoCurrency);
-            Assert.AreEqual(wallet.Address, inputTransaction2.OutputAddress);
-            Assert.AreEqual(wallet.UserId, inputTransaction2.UserId);
-            Assert.AreEqual(TransactionType.Deposit, inputTransaction2.Type);
-
-            Assert.AreEqual("LTC", inputTransaction3.CryptoCurrency);
-            Assert.AreEqual(wallet.Address, inputTransaction3.OutputAddress);
-            Assert.AreEqual(wallet.UserId, inputTransaction3.UserId);
-            Assert.AreEqual(TransactionType.Deposit, inputTransaction3.Type);
-        }
-
-        [Test]
-        [Ignore("Public Insight API doesn't work")]
-        public async Task TestBchDepositsHistory()
-        {
-            // Arrange
-
-            var historyProvider = new BchDepositsHistoryProvider
-            (
-                _logFactory,
-                new BchSettings
-                {
-                    Network = "main",
-                    InsightApiUrl = "https://blockdozer.com/insight-api"
-                },
-                _blockchainProvider,
-                _addressNormalizer
-            );
-            var wallet = new DepositWallet
-            (
-                Guid.NewGuid(),
-                _addressNormalizer.NormalizeOrDefault("qrvvjf9an22vv4wumm2enzdee7xna659kggarhwzyl", "BCH"),
-                "BCH"
-            );
-
-            // Act
-
-            var transactions = await historyProvider.GetHistoryAsync(wallet, null);
-
-            Assert.IsNull(transactions.Continuation, "Test should be modified to support continuation");
-
-            var inputTransaction = transactions.Items.SingleOrDefault(x => x.Hash == "ca5119c2a07ef74e66fc25f5eb2501fede8eb04b1174c0e27b4e0093b705acfc");
-            var outputTransaction = transactions.Items.SingleOrDefault(x => x.Hash == "e9510d71e44749c9456fe2040c8ae5e276698dfd834c1c0c1329a85506cc87ac");
-
-            // Assert
-
-            Assert.IsNotNull(inputTransaction);
-            Assert.IsNull(outputTransaction);
-
-            Assert.AreEqual("BCH", inputTransaction.CryptoCurrency);
-            Assert.AreEqual(wallet.Address, inputTransaction.OutputAddress);
-            Assert.AreEqual(wallet.UserId, inputTransaction.UserId);
-            Assert.AreEqual(TransactionType.Deposit, inputTransaction.Type);
         }
 
         [Test]
@@ -356,7 +246,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
                     RpcUrl = "http://s.altnet.rippletest.net:51234"
                 }
             );
-            
+
             var wallet = new DepositWallet
             (
                 Guid.NewGuid(),

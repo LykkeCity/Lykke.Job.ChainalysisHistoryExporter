@@ -31,8 +31,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
             builder.RegisterInstance(_settings.Slack);
             builder.RegisterInstance(_settings.Btc);
             builder.RegisterInstance(_settings.Eth);
-            builder.RegisterInstance(_settings.Ltc);
-            builder.RegisterInstance(_settings.Bch);
             builder.RegisterInstance(_settings.Xrp);
 
             builder.RegisterType<Exporter>().AsSelf();
@@ -60,8 +58,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Modules
 
             builder.RegisterType<GeneralAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<BtcAddressNormalizer>().As<IAddressNormalizer>();
-            builder.RegisterType<BchAddressNormalizer>().As<IAddressNormalizer>();
-            builder.RegisterType<LtcAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<EthAddressNormalizer>().As<IAddressNormalizer>();
             builder.RegisterType<XrpAddressNormalizer>().As<IAddressNormalizer>();
 

@@ -16,8 +16,6 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Settings
         public AssetsClientSettings Assets { get; set; }
         public BtcSettings Btc { get; set; }
         public EthSettings Eth { get; set; }
-        public LtcSettings Ltc { get; set; }
-        public BchSettings Bch { get; set; }
         public XrpSettings Xrp { get; set; }
     }
 }
