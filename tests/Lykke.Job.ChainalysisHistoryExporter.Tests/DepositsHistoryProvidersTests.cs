@@ -259,8 +259,8 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
             var transactions = await historyProvider.GetHistoryAsync(wallet, null);
 
             var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "BD209CEFCDF0ABA89FE8CC225E840EF7BB4407149B74B7AAB66F71C8B09D424F");
-            var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "8812C6CAFBE7C37C449D0C64673371BEAE26500276648FE6634BE87FCA9AFDF9");
-            var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "B5E4D68E8F0C9C440BF1C4040CB303546A0534EE173AB372B3F149ADCA59AB0D");
+            var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "14A10CA1249E24252594A38369AAAFA18E58A7B727D75C0877AAA8B1F94D62E0");
+            var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "7EA763F38BE9E79C3B6CF62AA7074EB03369911580A966DBA2BB3924FB0BAF2F");
 
 
             // Assert
@@ -302,7 +302,7 @@ namespace Lykke.Job.ChainalysisHistoryExporter.Tests
 
             var inputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "73E4E8F9E70898C0D9F9AA7809E1885E5C91CA75F0A12DEB17EE5F6FAD4C0B60");
             var inputTransaction2 = transactions.Items.SingleOrDefault(x => x.Hash == "6C00045F82B78C4B0A8BEA31E0EC4ADE3FE7FF9A3DEA637C7B38B213D0B587A9");
-            var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "B5E4D68E8F0C9C440BF1C4040CB303546A0534EE173AB372B3F149ADCA59AB0D");
+            var outputTransaction1 = transactions.Items.SingleOrDefault(x => x.Hash == "4C1CF8BF0C0A94AF276E580CD3D72E2AA59BC9F81C423FC8ACF5ADE3FFA475BD");
 
 
             // Assert
