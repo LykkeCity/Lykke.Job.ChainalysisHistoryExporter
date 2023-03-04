@@ -43,7 +43,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.19.0" />
     <PackageReference Include="Multiformats.Hash" Version="1.5.0" />
     <PackageReference Include="NBitcoin.Altcoins" Version="1.0.2.8" />
     <PackageReference Include="QBitNinja.Client" Version="1.0.3.50" />
